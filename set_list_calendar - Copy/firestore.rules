@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Any user can create their own user document, but only they can modify it.
+    match /users/{userId} {
+      allow read, update, delete: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+
+      // This rule applies to ALL subcollections of a user (jokes, setlists, etc.)
+      // It ensures that only the authenticated owner of the parent user
+      // document can access this data.
+      match /{document=**} {
+        allow read, write: if request.auth.uid == userId;
+      }
+    }
+    
+    // Global setlists collection with user-based access control
+    match /setlists/{setlistId} {
+      // Only the owner can read, write, and delete their setlists
+      allow read, write, delete: if request.auth.uid == resource.data.ownerId;
+      
+      // Allow creation if user is authenticated and sets themselves as owner
+      allow create: if request.auth.uid != null && 
+                       request.auth.uid == request.resource.data.ownerId;
+      
+      // Subcollection access for jokes within setlists
+      match /jokes/{jokeId} {
+        // Only the setlist owner can manage jokes in their setlists
+        allow read, write: if request.auth.uid == get(/databases/$(database)/documents/setlists/$(setlistId)).data.ownerId;
+        allow create: if request.auth.uid != null && 
+                         request.auth.uid == get(/databases/$(database)/documents/setlists/$(setlistId)).data.ownerId;
+      }
+      
+      // Subcollection access for comments within setlists
+      match /comments/{commentId} {
+        // Only the setlist owner can manage comments in their setlists
+        allow read, write: if request.auth.uid == get(/databases/$(database)/documents/setlists/$(setlistId)).data.ownerId;
+        allow create: if request.auth.uid != null && 
+                         request.auth.uid == get(/databases/$(database)/documents/setlists/$(setlistId)).data.ownerId;
+      }
+    }
+    
+    // Global jokes collection with user-based access control  
+    match /jokes/{jokeId} {
+      // Only the author can read, write, and delete their jokes
+      allow read, write, delete: if request.auth.uid == resource.data.authorId;
+      
+      // Allow creation if user is authenticated and sets themselves as author
+      allow create: if request.auth.uid != null && 
+                       request.auth.uid == request.resource.data.authorId;
+    }
+    
+    // Deny access to all other documents not explicitly allowed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

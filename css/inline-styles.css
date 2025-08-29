@@ -1,0 +1,1199 @@
+:root {
+    --bg-surface: #232533;
+}
+
+/* Custom base styles */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1.35rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    /* background: linear-gradient(90deg, #444857 0%, #232533 100%); */
+    color: #fff;
+    box-shadow: 0 2px 8px 0 rgba(30, 41, 59, 0.10), 0 1.5px 4px 0 rgba(30, 41, 59, 0.08);
+    border: none;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
+    transition: 
+        background 0.2s cubic-bezier(.4,0,.2,1),
+        box-shadow 0.2s cubic-bezier(.4,0,.2,1),
+        transform 0.1s cubic-bezier(.4,0,.2,1);
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+.pill:last-child {
+    margin-right: 0;
+}
+
+.pill:hover, .pill:focus {
+    background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.15);
+    transform: scale(1.05);
+}
+
+.pill .fa, .pill .pill-icon {
+    margin-right: 0.5rem;
+}
+
+.pill .ml-2 {
+    margin-left: 0.75rem;
+    color: #cbd5e1;
+    font-size: 1.1em;
+    transition: color 0.2s;
+}
+
+.pill:hover .ml-2 {
+    color: #fff;
+}
+
+/* Pill Dropdown Styles - from pills demo */
+.pill-edit-icon {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.pill:hover .pill-edit-icon {
+    opacity: 1;
+}
+
+.pill-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    min-width: 140px;
+}
+
+.pill-dropdown.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dropdown-option {
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    margin: 0.25rem;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+.dropdown-option:last-child {
+    margin-bottom: 0.25rem;
+}
+
+.dropdown-option:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.dropdown-option.selected {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.dropdown-option-check {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.75rem;
+}
+
+.dropdown-option.selected .dropdown-option-check {
+    opacity: 1;
+}
+
+/* Special positioning for day pills */
+.pill[data-type="day"] {
+    position: relative;
+}
+
+/* Pill dropdown base styles */
+.pill-dropdown {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 99998;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    max-height: 0;
+    overflow: hidden;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 200px;
+}
+
+/* Mobile-specific dropdown adjustments */
+@media (max-width: 768px) {
+    .pill-dropdown {
+        position: fixed;
+        left: 1rem;
+        right: 1rem;
+        top: auto;
+        bottom: 80px; /* Above bottom bar */
+        margin-top: 0;
+        width: auto;
+        min-width: auto;
+        max-height: 60vh;
+        transform: translateY(0);
+    }
+    
+    .dropdown-option {
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+        touch-action: manipulation;
+    }
+}
+
+/* Desktop dropdown positioning */
+@media (min-width: 769px) {
+    .pill-dropdown {
+        position: absolute;
+        min-width: 180px;
+        max-width: 250px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    /* Adjust position if dropdown would go off-screen */
+    .pill[data-type="day"]:last-child .pill-dropdown,
+    .pill[data-type="day"]:nth-last-child(2) .pill-dropdown {
+        right: 0;
+        left: auto;
+    }
+}
+
+.pill-dropdown.visible {
+    opacity: 1;
+    visibility: visible;
+}
+    
+
+
+.dropdown-option {
+    padding: 0.75rem 1rem;
+    color: #d1d5db;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #374151;
+}
+
+.dropdown-option:last-child {
+    border-bottom: none;
+}
+
+.dropdown-option:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+
+.dropdown-option.selected {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+.dropdown-option-check {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.dropdown-option.selected .dropdown-option-check {
+    opacity: 1;
+}
+
+.pill-edit-icon {
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.pill.editing .pill-edit-icon {
+    transform: rotate(180deg);
+}
+
+#filter-modal {
+    transition: opacity 0.3s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* Remove any mobile-specific alignment overrides */
+}
+
+/* Utility to hide the scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.day-pill {
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #4b5563;
+    background-color: #374151;
+    color: #d1d5db;
+    transition: all 0.15s ease-out;
+}
+
+.day-pill.active {
+    background-color: #f9fafb;
+    color: #1f2937;
+    border-color: #f9fafb;
+}
+
+.day-pill:active {
+    transform: scale(0.95);
+    background-color: #4b5563;
+}
+
+/* Venue Choice Popup Styling */
+.venue-choice-popup .leaflet-popup-content-wrapper {
+    background: #1f2937;
+    color: #f3f4f6;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.venue-choice-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 0;
+}
+
+.venue-choice-container {
+    padding: 20px;
+    text-align: center;
+}
+
+.venue-choice-container h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    color: #f3f4f6;
+}
+
+.venue-choice-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.venue-choice-btn {
+    background: #374151;
+    color: #f3f4f6;
+    border: 2px solid #4b5563;
+    border-radius: 6px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.venue-choice-btn:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+    transform: translateY(-1px);
+}
+
+.venue-choice-btn strong {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.venue-choice-btn small {
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
+.venue-choice-popup .leaflet-popup-tip {
+    background: #1f2937;
+}
+
+.custom-time-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-bottom: 1px solid #6b7280;
+    padding-bottom: 0.25rem;
+    width: fit-content;
+}
+
+.time-part {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.time-part:focus {
+    outline: none;
+}
+
+.time-dropdown {
+    position: absolute;
+    z-index: 60;
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 0.5rem;
+    max-height: 150px;
+    overflow-y: auto;
+    color: white;
+}
+
+.time-dropdown-option {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #e5e7eb;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+    margin: 0.125rem;
+}
+
+.time-dropdown-option:hover {
+    background-color: #6366f1;
+    color: white;
+}
+
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 0.25rem;
+    border: 2px solid #6b7280;
+    background-color: transparent;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.custom-checkbox:checked {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+}
+
+.custom-checkbox:checked::after {
+    content: '✔';
+    position: absolute;
+    color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.9rem;
+}
+
+@media (min-width: 1024px) {
+  #search-and-filters-row {
+    width: auto !important;
+    left: 1.5rem !important;
+    top: 1.5rem !important;
+  }
+}
+
+/* Minimized view specific positioning */
+@media (max-width: 1023px) {
+  #active-pills-row-mobile {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    z-index: 50 !important;
+    background: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    margin-top: 1.1rem !important; /* Lower the pills by adding top margin */
+    margin-left: 1.6rem !important; /* Align with search bar */
+  }
+}
+
+#search-and-filters-row {
+  min-width: 0;
+  width: auto;
+  max-width: none;
+}
+
+#filters-scroll-container {
+  min-width: 0;
+}
+
+#active-pills-row,
+#active-pills-row-mobile {
+    height: 2.5rem; /* Adjust to match your pill height */
+    align-items: center;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    pointer-events: auto !important; /* Enable interactions */
+}
+
+#active-pills-row {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    position: sticky;
+    top: 1.75rem;
+    background: transparent;
+    z-index: 100;
+    padding: 0.5rem 0;
+    border-radius: 2rem;
+    gap: 0.5rem;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    max-width: calc(100vw - 320px - 160px - 384px - 4rem) !important; /* Prevent overlap with sidebar in maximized view */
+    margin-left: .5rem;
+}
+
+#active-pills-row::-webkit-scrollbar {
+    display: none;
+}
+
+#active-pills-row-mobile {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    min-width: 0;
+    width: 100% !important;
+    max-width: none !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    /* background: rgba(255, 0, 0, 0.1) !important; */ /* Debug background disabled */
+    position: relative !important;
+    padding: 0 !important;
+    pointer-events: auto; /* Enable clicking on pills */
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    z-index: 50 !important;
+    /* Ensure proper scrolling behavior */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+#active-pills-row-mobile::-webkit-scrollbar {
+    display: none;
+}
+
+#modal-button-mobile {
+    /* Airbnb-style filter button - positioning handled by Tailwind classes */
+    position: relative !important;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+#active-pills-row-mobile .pill:not(#modal-button-mobile) {
+    margin-left: 0;
+    flex-shrink: 0;
+}
+
+.time-pill {
+    white-space: nowrap;
+    min-width: 180px;
+}
+
+#active-pills-row .pill:first-child {
+    margin-left: 0;
+}
+
+#active-pills-row-mobile .pill:first-child {
+    margin-left: 0;
+}
+
+/* Responsive adjustments for the new layout */
+@media (max-width: 1023px) {
+    #search-and-filters-row {
+        top: 0.5rem;
+        left: 0 !important;
+        padding-left: 0 !important;
+        right: 0 !important;
+        padding-right: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+    }
+    
+    /* Ensure filters container is properly positioned in minimized view */
+    #active-pills-row-mobile {
+        position: relative !important;
+        height: 2.5rem;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        box-sizing: border-box;
+        /* Enable smooth horizontal scrolling */
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        /* Ensure pills can scroll properly */
+        min-width: 0;
+        flex-shrink: 0;
+        /* Hide scrollbar but keep functionality */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        /* Make pills overflow right */
+        direction: ltr;
+        white-space: nowrap !important;
+        flex-wrap: nowrap !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        /* Remove background, border-radius, box-shadow, and padding */
+        background: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        z-index: 50 !important;
+    }
+    
+    .mobile-pills-row {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+        position: relative !important;
+        display: flex !important;
+    }
+    #modal-button-mobile {
+        /* Airbnb-style filter button handled by Tailwind */
+        position: relative !important;
+        z-index: 2;
+        flex-shrink: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    #search-and-filters-row {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+/* --- Google Maps Style Autocomplete (Dark Mode Enhanced) --- */
+.autocomplete-dropdown {
+    background: #18181b;
+    border: 1.5px solid #27272a;
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(30,41,59,0.25), 0 1.5px 4px 0 rgba(30,41,59,0.10);
+    padding: 0.5rem 0.25rem;
+    margin-top: 0.5rem;
+    z-index: 1000;
+    max-height: 22rem;
+    overflow-y: auto;
+    min-width: 340px;
+}
+
+.autocomplete-suggestion {
+    display: flex;
+    align-items: flex-start;
+    background: transparent;
+    border-radius: 0.75rem;
+    margin: 0.18rem 0.4rem;
+    padding: 0.5rem 1rem 0.5rem 0.8rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background 0.18s, border 0.18s, box-shadow 0.18s;
+    position: relative;
+    min-height: 36px;
+}
+
+.autocomplete-suggestion.selected,
+.autocomplete-suggestion:hover {
+    background: #232336;
+    border: 2px solid #6366f1;
+}
+
+.autocomplete-suggestion-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    margin-right: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    background: #232336;
+    color: #60a5fa;
+}
+
+.autocomplete-suggestion-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.autocomplete-suggestion-title {
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.97rem;
+    margin-bottom: 0.18rem;
+    letter-spacing: 0.01em;
+    /* Allow wrapping */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+}
+
+.autocomplete-suggestion-subtitle {
+    font-size: 0.90rem;
+    color: #d1d5db;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.08em;
+}
+
+.autocomplete-suggestion-time {
+    font-size: 0.90rem;
+    margin-top: 0.1rem;
+    font-weight: 500;
+}
+
+.autocomplete-suggestion-time.open {
+    color: #4ade80;
+}
+
+.autocomplete-suggestion-time.closed {
+    color: #f87171;
+}
+
+.autocomplete-suggestion-time.unknown {
+    color: #a1a1aa;
+}
+
+.autocomplete-no-results {
+    padding: 1.2rem 0.5rem;
+    text-align: center;
+    color: #a1a1aa;
+    font-size: 1rem;
+}
+
+.autocomplete-highlight {
+    background: rgba(99, 102, 241, 0.18); /* Soft violet, matches #6366f1 */
+    color: inherit;
+    padding: 0.08em 0.25em;
+    border-radius: 0.25em;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+
+.autocomplete-suggestion:focus {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+
+.autocomplete-suggestion-distance {
+    color: #60a5fa;
+    font-size: 0.87rem;
+    margin-left: 0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-align: left;
+    display: block;
+}
+
+.autocomplete-history-label {
+    color: #a1a1aa;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.autocomplete-history-remove {
+    background: none;
+    border: none;
+    color: #a1a1aa;
+    font-size: 1.25rem;
+    margin-left: 0.75rem;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: background 0.15s, opacity 0.15s;
+}
+
+.autocomplete-suggestion.history:hover .autocomplete-history-remove,
+.autocomplete-history-remove:focus {
+    opacity: 1;
+    background: #232336;
+}
+
+.autocomplete-clear-history-row {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0 0.2rem 0;
+}
+
+.autocomplete-clear-history-btn {
+    background: none;
+    border: none;
+    color: #6366f1;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.autocomplete-clear-history-btn:hover, .autocomplete-clear-history-btn:focus {
+    background: #232336;
+    color: #fff;
+}
+
+.autocomplete-history-divider {
+    color: #a1a1aa;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    padding: 0.5rem 1.2rem 0.2rem 1.2rem;
+    border-top: 1px solid #232336;
+    margin-top: 0.2rem;
+    margin-bottom: 0.1rem;
+}
+
+.autocomplete-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+}
+
+.autocomplete-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #6366f1;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: autocomplete-spin 0.8s linear infinite;
+}
+
+@keyframes autocomplete-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.mic-time-pill {
+    display: inline-block;
+    padding: 0.5em 1.2em;
+    border-radius: 1.2em;
+    background: linear-gradient(90deg, #6366f1 0%, #6d28d9 100%);
+    color: #fff;
+    font-weight: 500;
+    margin: 0.2em 0.5em 0.2em 0;
+    font-size: 1.1em;
+    box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10);
+    transition: transform 0.15s cubic-bezier(.4,0,.2,1), background 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+}
+
+.mic-time-pill:hover, .mic-time-pill:focus {
+    background: linear-gradient(90deg, #7c3aed 0%, #6366f1 100%);
+    transform: scale(1.12);
+    box-shadow: 0 4px 16px 0 rgba(99,102,241,0.18);
+    outline: none;
+    z-index: 2;
+}
+
+.ig-link {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.ig-link:hover, .ig-link:focus {
+    color: #0a2e7a;
+    text-decoration: underline;
+}
+
+.mic-popup-details,
+.mic-popup-details .details-grid {
+    pointer-events: auto !important;
+}
+
+#clear-search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+#clear-search-btn.hidden {
+    display: none;
+}
+
+/* Ensure search input has proper styling */
+#search-input {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    color: #f3f4f6 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#search-input::placeholder {
+    color: #9ca3af !important; /* text-gray-400 */
+    opacity: 1 !important;
+}
+
+#search-input:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    color: #f3f4f6 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Additional specificity to override any external styles */
+input#search-input,
+input#search-input:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    color: #f3f4f6 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#map-search-bar > div {
+    background: var(--bg-surface, #232533) !important;
+}
+
+/* Ensure modal is always centered */
+#filter-modal {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#filter-modal.hidden {
+    display: none !important;
+}
+
+/* Desktop centering for filter modal */
+#filter-modal {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Desktop height constraints for modal content */
+#modal-content {
+  max-height: 80vh !important;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+/* Ensure modal content main section can scroll */
+#modal-content main {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  max-height: calc(80vh - 120px) !important;
+}
+
+@media (max-width: 600px) {
+  #filter-modal {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  #modal-content {
+    width: 90vw !important;
+    max-width: 90vw !important;
+    min-width: 0 !important;
+    height: 50vh !important;
+    max-height: 60vh !important;
+    min-height: 0 !important;
+    border-radius: 1.5rem !important;
+    margin: 0 !important;
+    padding: 1.5rem 1rem 0 1rem !important;
+    box-shadow: 0 8px 32px 0 rgba(30,41,59,0.25), 0 1.5px 4px 0 rgba(30,41,59,0.10);
+    background: rgba(36, 39, 54, 0.95) !important;
+    backdrop-filter: blur(18px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+  }
+  #filter-modal main {
+    padding: 1rem 0.5rem !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    max-height: none !important;
+  }
+  #filter-modal header, #filter-modal footer {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  #filter-modal footer {
+    flex-shrink: 0 !important;
+  }
+}
+
+#right-sidebar {
+    background: #232533 !important;
+}
+
+#right-sidebar .flex.justify-between.items-center.p-4,
+#right-sidebar .p-4.flex.flex-col.gap-4.border-b {
+    background: #232533 !important;
+    background-color: #232533 !important;
+}
+
+#active-pills-row .pill,
+#active-pills-row-mobile .pill {
+    margin-bottom: 0 !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    flex-shrink: 0;
+    pointer-events: auto !important; /* Enable clicking on pills */
+}
+
+@media (max-width: 600px) {
+  #dayOfWeek-filters { display: none !important; }
+  .mobile-day-select-wrapper { display: block !important; margin-bottom: 1rem; position: relative; }
+  .mobile-day-select {
+    width: 100%;
+    background: #353a4a;
+    color: #fff;
+    border: 1.5px solid #6366f1;
+    border-radius: 1.2rem;
+    padding: 1.1rem 1.2rem 1.1rem 1.2rem;
+    font-size: 1.15rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px 0 rgba(30,41,59,0.10);
+    margin-bottom: 0.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  .mobile-day-select:focus {
+    outline: 2px solid #6366f1;
+    background: #232533;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px #6366f1;
+  }
+  .mobile-day-select-wrapper::after {
+    content: '\25BC';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a1a1aa;
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+  /* X button for mobile dropdown */
+  .mobile-day-select-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    background: none;
+    border: none;
+    color: #a1a1aa;
+    font-size: 1.7rem;
+    z-index: 10;
+    cursor: pointer;
+    padding: 0 0.2rem;
+    transition: color 0.2s;
+  }
+  .mobile-day-select-close:hover {
+    color: #fff;
+  }
+}
+
+#modal-button {
+  /* Light gray filter button for better map contrast */
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+  border-color: #9ca3af !important;
+}
+
+#modal-button:hover {
+  background-color: #e5e7eb !important;
+  border-color: #6b7280 !important;
+}
+
+/* Ensure mobile pills can overflow properly */
+.mobile-pills-row .pill {
+    flex-shrink: 0;
+    min-width: fit-content;
+}
+
+/* Additional barrier removal for mobile pills */
+.mobile-pills-row {
+    overflow: visible !important;
+    max-width: none !important;
+    width: 100% !important;
+}
+
+.mobile-pills-row .pill {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+}
+
+@media (max-width: 1023px) {
+  #modal-button-mobile {
+    /* Light gray filter button for better map contrast */
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+    border-color: #9ca3af !important;
+    min-width: fit-content !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.625rem 1.25rem !important; /* py-2.5 px-5 */
+    border-radius: 0.75rem !important; /* rounded-xl */
+    white-space: nowrap !important;
+  }
+  #modal-button-mobile:hover {
+    background-color: #e5e7eb !important;
+    border-color: #6b7280 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .mobile-pills-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    box-sizing: border-box !important;
+  }
+  .mobile-pills-row .pill {
+    flex-shrink: 0 !important;
+    min-width: fit-content !important;
+    white-space: nowrap !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #search-input {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  #right-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+  #right-sidebar .sidebar-content {
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  #mic-list {
+    flex: 1 1 0% !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    max-height: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  #mic-detail-modal {
+    justify-content: center;
+    align-items: center;
+    right: 408px; /* 384px sidebar + 24px gap */
+    left: 0;
+    width: auto;
+  }
+  #mic-detail-modal-content {
+    max-width: 300px;
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+}

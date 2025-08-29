@@ -1,0 +1,175 @@
+/* Bottom bar for minimized/mobile view only */
+#bottom-bar-mobile {
+    display: none;
+}
+@media (max-width: 1023px) {
+    #bottom-bar-mobile {
+        display: block;
+        position: fixed;
+        left: 0; 
+        right: 0; 
+        bottom: 0;
+        z-index: 9999;
+        background: #18191a;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
+        padding: 0.5rem 0.75rem;
+        transform: none !important;
+        transition: none !important;
+        will-change: auto;
+    }
+    .bottom-bar-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        transform: none !important;
+        transition: none !important;
+    }
+    .bottom-bar-left, .bottom-bar-center, .bottom-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .bottom-bar-left { 
+        position: absolute;
+        left: 0;
+        flex: 0;
+        min-width: 0; 
+    }
+    .bottom-bar-center {
+        justify-content: center;
+        gap: 1rem;
+    }
+    .bottom-bar-right { 
+        position: absolute;
+        right: 0;
+        flex: 0;
+    }
+    .bottom-bar-info .title {
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .bottom-bar-info .subtitle {
+        color: #9ca3af;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .quick-action-btn, .bottom-bar-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px; height: 40px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 0.5rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .bottom-bar-btn.primary {
+        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+    .bottom-bar-btn.primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+    }
+    .quick-action-btn:hover, .bottom-bar-btn:hover {
+        background: rgba(255,255,255,0.18);
+    }
+    /* Hide map controls in minimized/mobile view */
+    .map-controls {
+        display: none !important;
+    }
+    
+    /* Ensure body doesn't interfere with bottom bar */
+    body {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Ensure main content doesn't push bottom bar */
+    main {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Mobile sidebar styles */
+    @media (max-width: 1023px) {
+        #right-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            right: -100% !important;
+            width: 100% !important;
+            height: 100vh !important;
+            z-index: 1000 !important;
+            transform: translateX(100%) !important;
+            transition: transform 0.3s ease !important;
+            display: none !important;
+            background: #232533 !important;
+            border-left: none !important;
+        }
+        
+        #right-sidebar.mobile-open {
+            right: 0 !important;
+            transform: translateX(0) !important;
+            display: flex !important;
+        }
+        
+        /* Ensure mobile close button is visible */
+        #mobile-list-close {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        #mobile-list-close:hover {
+            color: #fff;
+        }
+        
+        /* Hide desktop close button on mobile */
+        #right-sidebar-toggle {
+            display: none !important;
+        }
+        
+        /* Ensure proper scrolling in mobile sidebar */
+        #right-sidebar .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Mobile sidebar header styling */
+        #right-sidebar .flex.justify-between.items-center.p-4 {
+            background: #232533 !important;
+            border-bottom: 1px solid #374151 !important;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        /* Ensure mic list takes full height */
+        #mic-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2rem; /* Add bottom padding to prevent cut-off */
+        }
+    }
+}

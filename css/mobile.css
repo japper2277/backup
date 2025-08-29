@@ -1,0 +1,1659 @@
+/* Mobile-Optimized Styles for Mic Finder */
+
+/* Enhanced viewport handling */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+}
+
+body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
+    position: relative;
+}
+
+/* Improved mobile layout */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    }
+    
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    main {
+        width: 100% !important;
+    }
+    
+    /* Mobile-first map container */
+    #map {
+        height: calc(100vh - 60px) !important;
+        width: 100vw !important;
+        min-height: 400px !important;
+        min-width: 320px !important;
+    }
+    
+    /* Fix for zero-sized containers on mobile */
+    .leaflet-container {
+        min-height: 400px !important;
+        min-width: 320px !important;
+    }
+    
+    /* Mobile search overlay */
+    #search-and-filters-row {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        z-index: 1001;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+}
+
+/* Allow text selection in specific areas */
+input, textarea, .selectable-text {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Touch-friendly button sizing */
+.mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+}
+
+/* Enhanced button styles for mobile */
+button, .button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+button:active, .button:active {
+    transform: scale(0.98);
+}
+
+/* Ripple effect for buttons */
+
+/* Mobile Favorites Modal Styles - Matching List View Format */
+.mobile-mic-card.list-view-format {
+    background: #374151 !important; /* Dark gray to match list view */
+    border: 1px solid #4b5563 !important; /* Darker border to match list view */
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    box-shadow: none; /* No shadows like list view */
+}
+
+/* Modal backdrop and content styling to match list view */
+.mobile-modal {
+    z-index: 9999; /* Lower z-index to appear below other elements */
+    background-color: transparent !important; /* Modal background transparent so map shows through */
+    animation: slideUpModal 0.3s ease-out;
+}
+
+.mobile-modal-backdrop {
+    background-color: transparent !important; /* No overlay - map shows through */
+}
+
+/* Mobile favorites modal with blue background - HIGH PRIORITY */
+.mobile-modal-content {
+    background-color: #1e40af !important; /* Blue background for favorites modal */
+    color: #f9fafb !important; /* Light text for contrast */
+    box-shadow: none !important; /* No shadows */
+    border-radius: 12px 12px 0 0 !important; /* Rounded top corners */
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Even more specific rule for favorites modal */
+#mobile-favorites-modal .mobile-modal-content,
+#mobile-favorites-modal .mobile-modal-body,
+#mobile-favorites-modal .mobile-modal-header {
+    background-color: #1e40af !important; /* Blue background for favorites modal */
+}
+
+#mobile-favorites-modal .mobile-modal-header {
+    border-bottom: 1px solid #3b82f6 !important; /* Blue border to match background */
+}
+
+#mobile-favorites-modal .mobile-modal-header h3 {
+    color: #ffffff !important; /* White text on blue background */
+}
+
+#mobile-favorites-modal .mobile-modal-close {
+    color: #ffffff !important; /* White close button on blue background */
+}
+
+.mobile-modal-body {
+    background-color: #1e40af !important; /* Blue background for favorites modal */
+}
+
+.mobile-modal-header {
+    background-color: #1e40af !important; /* Blue background for favorites modal */
+    border-bottom: 1px solid #3b82f6 !important; /* Blue border to match background */
+}
+
+/* Ensure modal close button is visible on blue background */
+.mobile-modal-close {
+    background: none !important;
+    border: none !important;
+    color: #ffffff !important; /* White close button on blue background */
+    font-size: 1.5rem !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.mobile-modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure modal header text is visible on blue background */
+.mobile-modal-header h3 {
+    color: #ffffff !important; /* White text on blue background */
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+}
+
+.mobile-mic-card.list-view-format .mic-card-content {
+    display: block; /* Full width since no star buttons */
+}
+
+.mobile-mic-card.list-view-format .mic-info {
+    width: 100%; /* Full width */
+}
+
+.mobile-mic-card.list-view-format .venue-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f9fafb !important; /* Light text for dark background */
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+}
+
+.mobile-mic-card.list-view-format .mic-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mobile-mic-card.list-view-format .time-info,
+.mobile-mic-card.list-view-format .location-info,
+.mobile-mic-card.list-view-format .cost-info,
+.mobile-mic-card.list-view-format .view-on-map-row {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #d1d5db !important; /* Lighter gray text for details */
+    margin-bottom: 4px;
+}
+
+.mobile-mic-card.list-view-format .time-info i,
+.mobile-mic-card.list-view-format .location-info i,
+.mobile-mic-card.list-view-format .cost-info i,
+.mobile-mic-card.list-view-format .view-on-map-row i {
+    width: 16px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.mobile-mic-card.list-view-format .view-on-map-row {
+    color: #3b82f6 !important; /* Blue text for "View on Map" link */
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+.mobile-favorite-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.mobile-favorite-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.mobile-favorite-btn:active {
+    transform: scale(0.95);
+}
+
+.mobile-favorite-btn.favorited i {
+    color: #f59e0b;
+}
+
+.empty-favorites {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af !important; /* Medium gray text for dark background */
+}
+
+.empty-favorites i {
+    display: block;
+    margin: 0 auto 16px;
+    color: #6b7280 !important; /* Darker gray icon for dark background */
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af !important; /* Medium gray text for dark background */
+}
+
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #fca5a5 !important; /* Light red text for dark background */
+}
+
+.error-state i {
+    display: block;
+    margin: 0 auto 16px;
+    color: #f87171 !important; /* Light red icon for dark background */
+}
+
+/* Favorites button state indicators */
+#favorites-btn-mobile.has-favorites {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#favorites-btn-mobile.has-favorites i {
+    color: #22c55e;
+}
+.mobile-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.mobile-ripple:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Mobile-specific input styles */
+input[type="text"], 
+input[type="search"], 
+input[type="email"], 
+input[type="tel"], 
+textarea, 
+select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+
+.mobile-search-input {
+    -webkit-appearance: none;
+    appearance: none;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 16px;
+    padding: 12px 16px;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.mobile-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Mobile drawer optimizations */
+.mobile-drawer {
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    will-change: transform;
+}
+
+.mobile-drawer-header {
+    touch-action: pan-y;
+    cursor: grab;
+}
+
+.mobile-drawer-header:active {
+    cursor: grabbing;
+}
+
+.mobile-drawer-content {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile list view padding fix */
+@media (max-width: 1023px) {
+    #mic-list {
+        padding-bottom: 2rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Ensure last mic card is fully visible */
+    #mic-list .mic-card:last-child {
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* Mobile filter chips */
+.mobile-filter-chips {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+.mobile-filter-chip {
+    flex-shrink: 0;
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.mobile-filter-chip:active {
+    transform: scale(0.95);
+}
+
+.mobile-filter-chip.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Mobile mic card optimizations */
+.mobile-mic-card {
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    margin: 4px 0;
+}
+
+.mobile-mic-card:active {
+    transform: scale(0.98);
+    background: #f3f4f6;
+}
+
+.mobile-mic-card.highlighted {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+/* Mobile map control buttons */
+.mobile-map-control-btn {
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.mobile-map-control-btn:active {
+    transform: scale(0.95);
+    background: #f9fafb;
+}
+
+/* Mobile FAB enhancements */
+.mobile-fab {
+    touch-action: manipulation;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.mobile-fab:active {
+    transform: scale(0.9);
+}
+
+.mobile-fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Modal optimizations for mobile */
+@keyframes slideUpModal {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Loading states */
+.mobile-loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.mobile-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Swipe gesture indicators */
+.mobile-swipe-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 12px;
+    padding: 8px;
+}
+
+.mobile-swipe-indicator::before {
+    content: '⇅';
+    margin-right: 4px;
+    font-size: 16px;
+}
+
+/* Improved popup sizing for mobile */
+.leaflet-popup-content-wrapper {
+    max-width: min(300px, calc(100vw - 40px));
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 12px 16px;
+}
+
+/* Enhanced marker visibility on mobile */
+.enhanced-marker {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.enhanced-marker:hover {
+    transform: scale(1.1);
+    z-index: 1000;
+}
+
+/* Mobile-specific marker cluster styles */
+.marker-cluster-small {
+    background-color: rgba(181, 226, 140, 0.8);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(241, 211, 87, 0.8);
+}
+
+.marker-cluster-large {
+    background-color: rgba(253, 156, 115, 0.8);
+}
+
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .mobile-search-container {
+        background: none !important;
+    }
+    
+    .mobile-search-input {
+        background: #374151;
+        border-color: #4b5563;
+        color: white;
+    }
+    
+    .mobile-drawer {
+        background: #1f2937;
+    }
+    
+    .mobile-drawer-header {
+        border-color: #374151;
+        color: white;
+    }
+    
+    .mobile-mic-card {
+        background: #374151;
+        color: white;
+    }
+    
+    .mobile-map-control-btn {
+        background: rgba(31, 41, 55, 0.95);
+        color: white;
+        border-color: #4b5563;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mobile-filter-chip {
+        border-width: 2px;
+    }
+    
+    .mobile-map-control-btn {
+        border-width: 2px;
+        border-color: #000;
+    }
+    
+    .mobile-mic-card {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .mobile-drawer {
+        transition: none;
+    }
+    
+    .mobile-modal {
+        animation: none;
+    }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+    .mobile-drawer {
+        max-height: 50vh;
+    }
+    
+    .mobile-modal-content {
+        max-height: 60vh;
+    }
+    
+    .mobile-search-container {
+        padding: 4px 16px;
+    }
+    
+    .mobile-filter-chips {
+        padding: 4px 16px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 320px) {
+    .mobile-search-input {
+        font-size: 14px;
+    }
+    
+    .mobile-filter-chip {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    
+    .mobile-map-control-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .mobile-fab {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+}
+
+/* Performance optimizations */
+.mobile-optimized {
+    contain: layout style paint;
+    will-change: transform;
+}
+
+.mobile-scrollable {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+
+/* Accessibility enhancements */
+.mobile-focus-visible:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.mobile-screen-reader-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Animation utilities */
+.mobile-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.mobile-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* CRITICAL: Force dark gray background on favorites modal to match list view - highest priority */
+#mobile-favorites-modal,
+#mobile-favorites-modal *,
+#mobile-favorites-modal .mobile-modal-content,
+#mobile-favorites-modal .mobile-modal-body,
+#mobile-favorites-modal .mobile-modal-header {
+    background-color: #374151 !important;
+    background: #374151 !important;
+    border: none !important; /* Remove the red test border */
+}
+
+/* SUPER AGGRESSIVE: Override any remaining blue backgrounds */
+#mobile-favorites-modal,
+#mobile-favorites-modal .mobile-modal-content,
+#mobile-favorites-modal .mobile-modal-body,
+#mobile-favorites-modal .mobile-modal-header,
+#mobile-favorites-modal .mobile-modal-backdrop {
+    background-color: #374151 !important;
+    background: #374151 !important;
+}
+
+/* Force text colors on dark gray background to match list view */
+#mobile-favorites-modal .mobile-modal-header h3,
+#mobile-favorites-modal .venue-name {
+    color: #f9fafb !important;
+}
+
+#mobile-favorites-modal .mobile-modal-close {
+    color: #f9fafb !important;
+}
+
+#mobile-favorites-modal .time-info,
+#mobile-favorites-modal .location-info,
+#mobile-favorites-modal .cost-info {
+    color: #d1d5db !important;
+}
+
+#mobile-favorites-modal .view-on-map-row {
+    color: #3b82f6 !important;
+}
+
+/* FINAL OVERRIDE: Maximum specificity to force dark gray background */
+html body #mobile-favorites-modal,
+html body #mobile-favorites-modal .mobile-modal-content,
+html body #mobile-favorites-modal .mobile-modal-body,
+html body #mobile-favorites-modal .mobile-modal-header {
+    background-color: #374151 !important;
+    background: #374151 !important;
+}
+
+/* ENHANCED UI/UX: Interactive elements and visual feedback */
+#mobile-favorites-modal .mobile-mic-card.list-view-format {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    border-color: #6366f1 !important;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:active {
+    transform: translateY(0);
+    transition: transform 0.1s ease;
+}
+
+/* Enhanced venue name styling */
+#mobile-favorites-modal .venue-name {
+    position: relative;
+    padding-bottom: 8px;
+}
+
+#mobile-favorites-modal .venue-name::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    transition: width 0.3s ease;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover .venue-name::after {
+    width: 100%;
+}
+
+/* Venue header with action buttons */
+#mobile-favorites-modal .venue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+#mobile-favorites-modal .venue-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover .venue-actions {
+    opacity: 1;
+}
+
+#mobile-favorites-modal .remove-venue-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #f9fafb;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+#mobile-favorites-modal .remove-venue-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+    transform: scale(1.1);
+}
+
+#mobile-favorites-modal .remove-venue-btn:active {
+    transform: scale(0.95);
+}
+
+/* Enhanced "View on Map" button */
+#mobile-favorites-modal .view-on-map-row {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    color: white !important;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer !important;
+}
+
+#mobile-favorites-modal .view-on-map-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+#mobile-favorites-modal .view-on-map-row:hover::before {
+    left: 100%;
+}
+
+#mobile-favorites-modal .view-on-map-row:active {
+    transform: scale(0.98);
+}
+
+/* Force cursor pointer with maximum specificity */
+html body #mobile-favorites-modal .view-on-map-row {
+    cursor: pointer !important;
+}
+
+/* Enhanced icons with subtle animations */
+#mobile-favorites-modal .time-info i,
+#mobile-favorites-modal .location-info i,
+#mobile-favorites-modal .cost-info i {
+    transition: transform 0.2s ease;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover .time-info i,
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover .location-info i,
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover .cost-info i {
+    transform: scale(1.1);
+    color: #6366f1 !important;
+}
+
+/* Swipe-to-delete indicator */
+#mobile-favorites-modal .mobile-mic-card.list-view-format {
+    position: relative;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format::before {
+    content: '← Swipe to delete';
+    position: absolute;
+    right: -120px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced modal header with better visual hierarchy */
+#mobile-favorites-modal .mobile-modal-header {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    border-bottom: 2px solid #6366f1 !important;
+    position: relative;
+}
+
+#mobile-favorites-modal .mobile-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #6366f1, transparent);
+}
+
+/* Header content layout */
+#mobile-favorites-modal .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#mobile-favorites-modal .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Show favorites only button */
+#mobile-favorites-modal .show-favorites-only-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+}
+
+#mobile-favorites-modal .show-favorites-only-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+#mobile-favorites-only-btn.active {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+    border-color: #6366f1 !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+#mobile-favorites-only-btn.active:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+#mobile-favorites-modal .show-favorites-only-btn:active {
+    transform: scale(0.98);
+}
+
+#mobile-favorites-modal .show-favorites-only-btn i {
+    font-size: 0.9rem;
+}
+
+#mobile-favorites-modal .show-favorites-only-btn .btn-text {
+    font-weight: 600;
+}
+
+/* Modal toggle button */
+#mobile-favorites-modal .modal-toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f9fafb;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+#mobile-favorites-modal .modal-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+#mobile-favorites-modal .modal-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+#mobile-favorites-modal .modal-toggle-btn i {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+/* Minimized modal state */
+#mobile-favorites-modal.minimized .mobile-modal-content {
+    max-height: 80px;
+    overflow: hidden;
+}
+
+#mobile-favorites-modal.minimized .modal-toggle-btn i {
+    transform: rotate(180deg);
+}
+
+/* Enhanced close button for edit modal */
+#edit-favorite-modal .mobile-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #f9fafb;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#edit-favorite-modal .mobile-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+#edit-favorite-modal .mobile-modal-close:active {
+    transform: scale(0.95);
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 480px) {
+    #mobile-favorites-modal .header-content {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    #mobile-favorites-modal .header-actions {
+        justify-content: center;
+    }
+    
+    #mobile-favorites-modal .show-favorites-only-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+    
+    #mobile-favorites-modal .modal-toggle-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+}
+
+/* Enhanced close button */
+#mobile-favorites-modal .mobile-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #f9fafb;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+#mobile-favorites-modal .mobile-modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#mobile-favorites-modal .mobile-modal-close:active {
+    transform: scale(0.95);
+}
+
+/* Ensure modal header text is visible on blue background */
+#mobile-favorites-modal .mobile-modal-header h3 {
+    color: #ffffff !important;
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+}
+
+/* Loading state enhancement */
+#mobile-favorites-modal .loading-spinner {
+    background: rgba(55, 65, 81, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(8px);
+}
+
+/* Empty state enhancement */
+#mobile-favorites-modal .empty-favorites {
+    background: rgba(55, 65, 81, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(8px);
+    border: 2px dashed #6366f1;
+}
+
+#mobile-favorites-modal .empty-favorites i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+/* Responsive improvements */
+@media (max-width: 480px) {
+    #mobile-favorites-modal .mobile-mic-card.list-view-format {
+        padding: 12px;
+        margin-bottom: 6px;
+    }
+    
+    #mobile-favorites-modal .venue-name {
+        font-size: 1rem;
+    }
+    
+    #mobile-favorites-modal .time-info,
+    #mobile-favorites-modal .location-info,
+    #mobile-favorites-modal .cost-info {
+        font-size: 0.8rem;
+    }
+}
+
+/* Edit favorite modal styling - COMPLETELY REDESIGNED */
+#edit-favorite-modal .edit-favorite-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0.5rem;
+}
+
+#edit-favorite-modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+}
+
+#edit-favorite-modal .form-group label {
+    color: #f9fafb;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#edit-favorite-modal .form-group label::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 2px;
+}
+
+#edit-favorite-modal .edit-input {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+#edit-favorite-modal .edit-input:focus {
+    outline: none !important;
+    border-color: #6366f1 !important;
+    background: white !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+#edit-favorite-modal .edit-input:hover {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+#edit-favorite-modal .edit-input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+/* Enhanced form actions */
+#edit-favorite-modal .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#edit-favorite-modal .save-edit-btn,
+#edit-favorite-modal .cancel-edit-btn {
+    flex: 1;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#edit-favorite-modal .save-edit-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+}
+
+#edit-favorite-modal .save-edit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+#edit-favorite-modal .save-edit-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+}
+
+#edit-favorite-modal .save-edit-btn:hover::before {
+    left: 100%;
+}
+
+#edit-favorite-modal .save-edit-btn:active {
+    transform: translateY(-1px) !important;
+}
+
+#edit-favorite-modal .cancel-edit-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #f9fafb !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+#edit-favorite-modal .cancel-edit-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+#edit-favorite-modal .cancel-edit-btn:active {
+    transform: translateY(0) !important;
+}
+
+/* Enhanced modal header for edit modal */
+#edit-favorite-modal .mobile-modal-header {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    border-bottom: 2px solid #6366f1 !important;
+    position: relative;
+    padding: 1.5rem !important;
+}
+
+#edit-favorite-modal .mobile-modal-header h3 {
+    color: #ffffff !important;
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+#edit-favorite-modal .mobile-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 2px;
+}
+
+/* Enhanced modal body for edit modal */
+#edit-favorite-modal .mobile-modal-body {
+    padding: 2rem 1.5rem !important;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+}
+
+/* Input field icons and enhancements */
+#edit-favorite-modal .form-group {
+    position: relative;
+}
+
+#edit-favorite-modal .edit-input {
+    padding-left: 48px !important;
+}
+
+#edit-favorite-modal .form-group::before {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: #6366f1;
+    z-index: 10;
+}
+
+#edit-favorite-modal .form-group[data-field="venue"]::before {
+    content: '🏢';
+}
+
+#edit-favorite-modal .form-group[data-field="time"]::before {
+    content: '🕐';
+}
+
+#edit-favorite-modal .form-group[data-field="day"]::before {
+    content: '📅';
+}
+
+#edit-favorite-modal .form-group[data-field="cost"]::before {
+    content: '💰';
+}
+
+/* Responsive improvements for edit modal */
+@media (max-width: 480px) {
+    #edit-favorite-modal .edit-favorite-form {
+        gap: 1.25rem;
+    }
+    
+    #edit-favorite-modal .edit-input {
+        padding: 14px 14px 14px 44px !important;
+        font-size: 0.95rem !important;
+    }
+    
+    #edit-favorite-modal .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    #edit-favorite-modal .save-edit-btn,
+    #edit-favorite-modal .cancel-edit-btn {
+        padding: 14px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Enhanced touch interactions for mobile */
+#mobile-favorites-modal .mobile-mic-card.list-view-format {
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format:active {
+    transform: scale(0.98);
+}
+
+/* Accessibility improvements */
+#mobile-favorites-modal .mobile-mic-card.list-view-format:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+#mobile-favorites-modal .remove-venue-btn:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* Loading state for actions */
+#mobile-favorites-modal .mobile-mic-card.list-view-format.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+#mobile-favorites-modal .mobile-mic-card.list-view-format.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #6366f1;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* SUPER AGGRESSIVE EDIT MODAL OVERRIDES - MAXIMUM SPECIFICITY */
+html body #edit-favorite-modal .edit-favorite-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 0.5rem !important;
+}
+
+html body #edit-favorite-modal .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    position: relative !important;
+}
+
+html body #edit-favorite-modal .form-group label {
+    color: #f9fafb !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 0.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+html body #edit-favorite-modal .form-group label::before {
+    content: '' !important;
+    width: 4px !important;
+    height: 16px !important;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+    border-radius: 2px !important;
+}
+
+html body #edit-favorite-modal .edit-input {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    padding: 16px 16px 16px 48px !important;
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+html body #edit-favorite-modal .edit-input:focus {
+    outline: none !important;
+    border-color: #6366f1 !important;
+    background: white !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+html body #edit-favorite-modal .edit-input:hover {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+html body #edit-favorite-modal .edit-input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+html body #edit-favorite-modal .form-actions {
+    display: flex !important;
+    gap: 1rem !important;
+    margin-top: 2rem !important;
+    padding-top: 1.5rem !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn,
+html body #edit-favorite-modal .cancel-edit-btn {
+    flex: 1 !important;
+    padding: 16px 24px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+    transition: left 0.5s ease !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn:hover::before {
+    left: 100% !important;
+}
+
+html body #edit-favorite-modal .save-edit-btn:active {
+    transform: translateY(-1px) !important;
+}
+
+html body #edit-favorite-modal .cancel-edit-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #f9fafb !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+html body #edit-favorite-modal .cancel-edit-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+html body #edit-favorite-modal .cancel-edit-btn:active {
+    transform: translateY(0) !important;
+}
+
+html body #edit-favorite-modal .mobile-modal-header {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    border-bottom: 2px solid #6366f1 !important;
+    position: relative !important;
+    padding: 1.5rem !important;
+}
+
+html body #edit-favorite-modal .mobile-modal-header h3 {
+    color: #ffffff !important;
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+}
+
+html body #edit-favorite-modal .mobile-modal-header::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 60px !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+    border-radius: 2px !important;
+}
+
+html body #edit-favorite-modal .mobile-modal-body {
+    padding: 2rem 1.5rem !important;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+}
+
+html body #edit-favorite-modal .form-group::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 1.1rem !important;
+    color: #6366f1 !important;
+    z-index: 10 !important;
+}
+
+html body #edit-favorite-modal .form-group[data-field="venue"]::before {
+    content: '🏢' !important;
+}
+
+html body #edit-favorite-modal .form-group[data-field="time"]::before {
+    content: '🕐' !important;
+}
+
+html body #edit-favorite-modal .form-group[data-field="day"]::before {
+    content: '📅' !important;
+}
+
+html body #edit-favorite-modal .form-group[data-field="cost"]::before {
+    content: '💰' !important;
+}
+
+/* Force button text to be visible */
+html body #edit-favorite-modal .save-edit-btn,
+html body #edit-favorite-modal .cancel-edit-btn {
+    color: inherit !important;
+    text-decoration: none !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+/* Override any inline styles that might be interfering */
+html body #edit-favorite-modal * {
+    box-sizing: border-box !important;
+}
+

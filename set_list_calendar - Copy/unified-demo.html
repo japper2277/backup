@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Drag System Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: white;
+            font-family: Inter, sans-serif;
+        }
+        .redirect-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            gap: 1rem;
+        }
+        .redirect-button {
+            background: linear-gradient(135deg, #1DB954, #45a3ff);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        .redirect-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <h1>🎭 Unified Drag & Drop System Demo</h1>
+        <p>Click below to view the unified drag and drop implementation</p>
+        <a href="http://localhost:3000/react-demo.html?unified=true" class="redirect-button">
+            Launch Unified Demo →
+        </a>
+        <p style="opacity: 0.7; font-size: 0.9rem;">
+            This demo showcases a single @dnd-kit implementation<br>
+            for both bank-to-setlist and setlist reordering interactions
+        </p>
+    </div>
+</body>
+</html>

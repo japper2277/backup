@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Collaborative Setlist Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        .test-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .test-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #fbbf24;
+        }
+        .test-card p {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        .instructions {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        .instructions h4 {
+            margin-bottom: 1rem;
+            color: #10b981;
+        }
+        .instructions ol {
+            padding-left: 1.5rem;
+        }
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .feature-icon {
+            color: #10b981;
+            width: 20px;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 1rem 0;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Real-time Collaboration Test</h1>
+        <div class="subtitle">
+            Multi-user collaborative setlist builder with Firebase backend
+        </div>
+        
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            System Ready for Testing
+        </div>
+
+        <div class="instructions">
+            <h4>🚀 How to Test Real-time Collaboration</h4>
+            <ol>
+                <li><strong>Open multiple browser tabs/windows</strong> with the same demo link</li>
+                <li><strong>Sign in anonymously</strong> - each tab gets a unique user</li>
+                <li><strong>Drag jokes</strong> from the left panel to the setlist</li>
+                <li><strong>Watch real-time updates</strong> appear across all tabs instantly</li>
+                <li><strong>See presence indicators</strong> showing who's currently online</li>
+                <li><strong>Edit jokes</strong> and watch changes sync in real-time</li>
+            </ol>
+        </div>
+
+        <div class="test-grid">
+            <a href="react-demo.html?collaborative=true" class="test-card" target="_blank">
+                <h3>🎭 Full React Demo</h3>
+                <p>Complete application with all collaborative features, Firebase authentication, and real-time presence system.</p>
+            </a>
+
+            <a href="collaborative-demo.html" class="test-card" target="_blank">
+                <h3>⚡ Standalone Demo</h3>
+                <p>Lightweight collaborative demo focusing specifically on real-time features and multi-user editing.</p>
+            </a>
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <i class="fas fa-users feature-icon"></i>
+                <span>Real-time presence indicators</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-sync-alt feature-icon"></i>
+                <span>Instant synchronization</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-edit feature-icon"></i>
+                <span>Collaborative editing</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-eye feature-icon"></i>
+                <span>User activity tracking</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-database feature-icon"></i>
+                <span>Firebase Firestore backend</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-bolt feature-icon"></i>
+                <span>Optimistic updates</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <span>Anonymous authentication</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt feature-icon"></i>
+                <span>Responsive design</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; opacity: 0.7; font-size: 0.9rem;">
+            <p><strong>Technical Stack:</strong></p>
+            <p>React 18 • Firebase v9 • Firestore • Realtime Database • ES6 Modules</p>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive feedback
+        document.querySelectorAll('.test-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    target.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Show loading state briefly
+        setTimeout(() => {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+                document.body.style.transition = 'opacity 0.5s ease-in-out';
+            }, 100);
+        }, 0);
+    </script>
+</body>
+</html>

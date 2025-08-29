@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Mic Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex items-center justify-center">
+
+    <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Mic Finder Admin Login</h1>
+        
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label for="email" class="text-sm font-medium text-gray-700">Email Address</label>
+                <input type="email" id="email" name="email" required 
+                       class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password" required
+                       class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <button type="submit" 
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Sign In
+            </button>
+        </form>
+
+        <p id="error-message" class="mt-4 text-center text-sm text-red-600"></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- App Configuration -->
+    <script src="js/config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const auth = firebase.auth();
+            const loginForm = document.getElementById('login-form');
+            const errorMessage = document.getElementById('error-message');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                errorMessage.textContent = ''; // Clear previous errors
+
+                const email = loginForm.email.value;
+                const password = loginForm.password.value;
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Signed in successfully
+                        console.log('Successfully logged in:', userCredential.user);
+                        // Redirect to the main page
+                        window.location.href = 'index.html';
+                    })
+                    .catch((error) => {
+                        console.error('Login Error:', error);
+                        errorMessage.textContent = 'Error: ' + error.message;
+                    });
+            });
+        });
+    </script>
+
+</body>
+</html> 

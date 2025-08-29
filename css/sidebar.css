@@ -1,0 +1,285 @@
+/* Sidebar Styles */
+:root {
+    --bg-main: #18191a;
+    --bg-surface: #242526;
+    --bg-surface-2: #3a3b3c;
+    --border-color: #3e4042;
+    --text-primary: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --accent-blue: #45a3ff;
+    --green: #32b977;
+    --yellow: #f5c518;
+    --purple: #9d6cff;
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+/* Main Sidebar Container */
+.filter-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background-color: var(--bg-surface);
+    padding: 1.5rem;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    overflow-y: auto;
+}
+
+/* Search Section */
+.search-section {
+    margin-bottom: 0.5rem;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    background: var(--bg-main);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* Filter Sections */
+.filter-section {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+}
+
+.section-header h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+/* Day Filter */
+.segmented-control {
+    display: flex;
+    background: var(--bg-main);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.segment-btn {
+    flex: 1;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 0.5rem 0.3rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.segment-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-surface-2);
+}
+
+.segment-btn.active {
+    background: var(--accent-blue);
+    color: white;
+}
+
+/* Checkbox Groups */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.filter-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-main);
+    cursor: pointer;
+    position: relative;
+}
+
+.filter-checkbox:checked {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.filter-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Time Input Styles */
+.time-range-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.time-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.time-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-input-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.time-input-group input[type="time"] {
+    background: var(--bg-main);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: border-color 0.2s ease;
+}
+
+.time-input-group input[type="time"]:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.time-input-group input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.time-input-group input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.8;
+}
+
+/* Time Select Styles */
+.time-select-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.time-select {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: none;
+    font-size: 0.9rem;
+    padding: 0.25rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.time-select:hover {
+    background: var(--bg-surface-2);
+}
+
+.time-select:focus {
+    box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.time-select-group span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Time Input Group Styles */
+.time-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-input-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.time-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .filter-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100%;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .filter-panel.active {
+        transform: translateX(0);
+    }
+} 

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Library - Spotify-Level Demo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0' 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #121212;
+            --bg-surface: #181818;
+            --bg-surface-2: #282828;
+            --bg-input: #2a2d3e;
+            --border-color: #3e4042;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-green: #1DB954;
+            --accent-blue: #45a3ff;
+            --accent-orange: #f5c518;
+            --accent-purple: #9d6cff;
+            --status-idea: #808080;
+            --status-workshopping: #f5c518;
+            --status-tight5: #45a3ff;
+            --status-showready: #1DB954;
+        }
+        body { font-family: var(--font-sans); background-color: var(--bg-main); color: var(--text-primary); margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .demo-container { max-width: 500px; width: 100%; background: var(--bg-surface); padding: 1rem; border-radius: 12px; box-shadow: 0 10px B30px rgba(0,0,0,0.3); }
+        h1 { text-align: center; margin-top: 0; color: var(--accent-green); }
+        
+        .joke-bank-panel { background: var(--bg-main); display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); background: var(--bg-surface-2); display: flex; justify-content: space-between; align-items: center; }
+        .panel-header h4 { margin: 0; font-size: 0.9rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .panel-actions { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .panel-actions input { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-primary); font-size: 0.95rem; font-family: inherit; }
+        
+        .joke-bank-list { height: 450px; overflow-y: auto; padding: 0.5rem; }
+        .joke-bank-item { background: var(--bg-surface-2); border: 1px solid transparent; border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; transition: all 0.2s ease; position: relative; }
+        .joke-bank-item:hover { background: #3a3b3c; }
+        .joke-item-text { font-size: 0.9rem; line-height: 1.3; color: var(--text-primary); margin-bottom: 0.5rem; padding-right: 2.5rem; }
+
+        .joke-item-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-secondary); }
+        .metadata-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .metadata-pill { background: var(--bg-main); color: var(--text-secondary); padding: 0.125rem 0.5rem; border-radius: 12px; font-weight: 500; font-size: 0.7rem; }
+        .pill-story { background: var(--accent-blue); color: white; }
+        .pill-clean { background: var(--accent-green); color: white; }
+        .performance-score { display: flex; align-items: center; gap: 0.25rem; }
+        .performance-score i { color: var(--accent-orange); }
+
+        .filter-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .filter-group label { font-size: 0.7rem; color: var(--text-secondary); }
+        .filter-bar select { width: 100%; background-color: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-size: 0.8rem; padding: 0.25rem; }
+        
+        .joke-menu-btn { position: absolute; top: 0.5rem; right: 0.5rem; font-size: 1rem; color: var(--text-secondary); cursor: pointer; opacity: 0.5; transition: all 0.2s; background: none; border: none; }
+        .joke-bank-item:hover .joke-menu-btn { opacity: 1; }
+        .joke-menu { display: none; position: absolute; background: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: 4px; z-index: 10; padding: 0.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .joke-menu button { background: none; border: none; color: var(--text-primary); padding: 0.5rem 1rem; text-align: left; width: 100%; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem; }
+        .joke-menu button:hover { background: #3a3b3c; }
+        .joke-menu i { width: 16px; text-align: center; }
+
+        .view-toggle { display: flex; background: var(--bg-surface-2); border-radius: 8px; padding: 4px; margin: 0 1rem 1rem 1rem; }
+        .view-toggle-btn { flex: 1; text-align: center; padding: 0.5rem; background: transparent; border: none; color: var(--text-secondary); font-weight: 600; border-radius: 6px; cursor: pointer; }
+        .view-toggle-btn.active { background: #3a3b3c; color: var(--text-primary); }
+        .discovery-page { display: none; padding: 0.5rem; height: 450px; overflow-y: auto; }
+        .discovery-section { margin-bottom: 1.5rem; }
+        .discovery-section h5 { margin: 0 0 0.75rem 0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        .discovery-item { background: var(--bg-surface-2); border-radius: 6px; padding: 0.75rem; display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem; }
+        .discovery-item i { color: var(--accent-purple); font-size: 1.5rem; }
+        .discovery-item em { font-size: 0.8rem; color: var(--text-secondary); display: block; }
+
+        .modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
+        .modal-container.visible { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--bg-surface-2); padding: 1.5rem; border-radius: 8px; max-width: 500px; width: 90%; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem; }
+        .modal-header h5 { margin: 0; font-size: 1rem; }
+        .modal-close-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; }
+        
+        .joke-card-second-line { display: flex; justify-content: space-between; align-items: center; }
+        .last-performed-info { font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; }
+        .last-performed-info i { color: var(--accent-blue); }
+        .right-meta { display: flex; align-items: center; gap: 0.75rem; }
+
+        .search-hint { font-size: 0.75rem; color: var(--text-secondary); padding: 0.25rem 1rem 0.5rem 1rem; }
+
+        /* --- NEW FEATURE: Joke Readiness --- */
+        .status-pill {
+            padding: 0.125rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .status-Idea { background-color: var(--status-idea); }
+        .status-Workshopping { background-color: var(--status-workshopping); }
+        .status-Tight-5-Ready { background-color: var(--status-tight5); }
+        .status-Show-Ready { background-color: var(--status-showready); }
+        .left-meta { display: flex; align-items: center; gap: 0.5rem; }
+
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>JokeFlix</h1>
+
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" data-view="library">Library</button>
+            <button class="view-toggle-btn" data-view="discovery">Discovery</button>
+        </div>
+
+        <div id="libraryView">
+            <div class="joke-bank-panel">
+                <div class="panel-header"><h4><i class="fas fa-book-open"></i> Your Jokes</h4></div>
+                <div class="panel-actions"><input type="search" id="jokeSearch" placeholder="Search your jokes..."></div>
+                <div class="search-hint">Try: "clean story", "new", "opener", or even "clena"</div>
+                
+                <div class="filter-bar">
+                    <div class="filter-group"><label for="sortBy">Sort by</label><select id="sortBy"><option value="createdAt_desc">Date Added</option><option value="performanceScore_desc">Best Performing</option><option value="useCount_desc">Most Used</option><option value="lastUsedAt_asc">Least Recently Used</option></select></div>
+                    <div class="filter-group"><label for="filterType">Joke Type</label><select id="filterType"><option value="all">All Types</option><option value="One-liner">One-liner</option><option value="Story">Story</option><option value="Observational">Observational</option></select></div>
+                </div>
+                
+                <div class="joke-bank-list" id="jokeBankList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ... other modals ... -->
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA STORE ---
+        // NEW: Added `readinessStatus` to the joke object.
+        const dataStore = {
+            jokes: [
+                { id: 101, text: 'Airplane food joke', tags: ['travel', 'food', 'opener'], estimated_duration: 60, createdAt: '2025-08-19T10:00:00.000Z', isFavorite: true, lastUsedAt: '2025-08-19T21:30:00.000Z', useCount: 5, jokeType: 'Observational', venueSuitability: ['Bar', 'Late-night'], performanceScore: 4.5, readinessStatus: 'Show Ready' },
+                { id: 102, text: 'Cat joke', tags: ['animals'], estimated_duration: 75, createdAt: '2025-08-15T11:00:00.000Z', isFavorite: false, lastUsedAt: '2024-08-19T22:00:00.000Z', useCount: 2, jokeType: 'One-liner', venueSuitability: ['Clean'], performanceScore: 3.0, readinessStatus: 'Tight 5 Ready' },
+                { id: 103, text: 'Dog joke', tags: ['animals', 'political'], estimated_duration: 50, createdAt: '2025-08-12T14:00:00.000Z', isFavorite: false, lastUsedAt: '2025-08-12T20:00:00.000Z', useCount: 10, jokeType: 'One-liner', venueSuitability: ['Clean'], performanceScore: 4.0, readinessStatus: 'Show Ready' },
+                { id: 104, text: 'My trip to the DMV', tags: ['story', 'clean'], estimated_duration: 240, createdAt: '2025-07-20T09:00:00.000Z', isFavorite: true, lastUsedAt: '2025-07-20T13:00:00.000Z', useCount: 8, jokeType: 'Story', venueSuitability: ['Clean', 'Corporate'], performanceScore: 5.0, readinessStatus: 'Show Ready' },
+                { id: 105, text: 'New 5 minutes about coffee shops', tags: ['new', 'observational'], estimated_duration: 300, createdAt: '2025-08-18T18:00:00.000Z', isFavorite: false, lastUsedAt: null, useCount: 0, jokeType: 'Observational', venueSuitability: ['Bar'], performanceScore: null, readinessStatus: 'Workshopping' },
+                { id: 106, text: 'Forgotten gem about flip phones', tags: ['opener', 'tech'], estimated_duration: 45, createdAt: '2023-01-10T15:00:00.000Z', isFavorite: false, lastUsedAt: '2023-01-10T21:00:00.000Z', useCount: 1, jokeType: 'One-liner', venueSuitability: ['Alt-Comedy'], performanceScore: 3.5, readinessStatus: 'Idea' },
+            ],
+            sets: [
+                 { id: 1, date: '2025-08-19', title: 'Open Mic', venue: 'The Laugh Factory', setlist: [101, 103] },
+                 { id: 2, date: '2025-08-12', title: 'Showcase', venue: 'The Comedy Store', setlist: [103] },
+            ],
+            getAllJokes: function() { return this.jokes; },
+            getJokeById: function(id) { return this.jokes.find(j => j.id === id); },
+            getHistoryForJoke: function(jokeId) { return this.sets.filter(set => set.setlist.includes(jokeId)).sort((a, b) => new Date(b.date) - new Date(a.date)); }
+        };
+        
+        const jokeBankEl = document.getElementById('jokeBankList');
+        const READINESS_STAGES = ['Idea', 'Workshopping', 'Tight 5 Ready', 'Show Ready'];
+
+        function renderJokeLibrary() {
+            // ... (Search and sort logic omitted for brevity)
+            let jokes = dataStore.getAllJokes(); 
+            
+            jokeBankEl.innerHTML = jokes.map(joke => {
+                const scoreHTML = joke.performanceScore ? `<div class="performance-score"><i class="fas fa-star"></i> ${joke.performanceScore.toFixed(1)}</div>` : '';
+                const history = dataStore.getHistoryForJoke(joke.id);
+                let lastPerformedHTML = '<div class="last-performed-info">&nbsp;</div>';
+                if (history.length > 0) {
+                    const lastSet = history[0];
+                    lastPerformedHTML = `<div class="last-performed-info"><i class="fas fa-history"></i><span>${lastSet.venue} &middot; ${new Date(lastSet.date).toLocaleDateString()}</span></div>`;
+                }
+                const pillsHTML = `<div class="metadata-pills"><span class="metadata-pill pill-${joke.jokeType.toLowerCase()}">${joke.jokeType}</span>${joke.venueSuitability.includes('Clean') ? '<span class="metadata-pill pill-clean">Clean</span>' : ''}</div>`;
+                
+                // --- NEW FEATURE: Joke Readiness Pill ---
+                // This creates the HTML for the color-coded status pill.
+                const status = joke.readinessStatus || 'Idea';
+                const statusClass = status.replace(/ /g, '-');
+                const statusIcon = { 'Idea': 'fa-lightbulb', 'Workshopping': 'fa-tools', 'Tight 5 Ready': 'fa-microphone', 'Show Ready': 'fa-star' }[status];
+                const statusPillHTML = `<div class="status-pill status-${statusClass}"><i class="fas ${statusIcon}"></i> ${status}</div>`;
+
+                return `
+                    <div class="joke-bank-item" data-joke-id="${joke.id}">
+                        <button class="joke-menu-btn" data-action="openMenu"><i class="fas fa-ellipsis-h"></i></button>
+                        <div class="joke-item-text">${joke.text}</div>
+                        <div class="joke-card-second-line">
+                            <div class="left-meta">
+                                ${statusPillHTML}
+                            </div>
+                            <div class="right-meta">
+                                ${pillsHTML}
+                                ${scoreHTML}
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+        
+        // --- EVENT LISTENERS ---
+        jokeBankEl.addEventListener('click', e => {
+            if (e.target.closest('[data-action="openMenu"]')) {
+                const jokeId = e.target.closest('.joke-bank-item').dataset.jokeId;
+                showJokeMenu(e.target, jokeId);
+            }
+        });
+
+        function showJokeMenu(button, jokeId) {
+            closeAllMenus();
+            const menu = document.createElement('div');
+            menu.className = 'joke-menu';
+            menu.style.position = 'absolute';
+            menu.innerHTML = `
+                <button data-action="setStatus"><i class="fas fa-traffic-light"></i> Set Status</button>
+                <button data-action="viewHistory"><i class="fas fa-history"></i> View Full History</button>
+            `;
+            document.body.appendChild(menu);
+            const btnRect = button.getBoundingClientRect();
+            menu.style.display = 'block';
+            menu.style.top = `${btnRect.bottom}px`;
+            menu.style.left = `${btnRect.right - menu.offsetWidth}px`;
+
+            // NEW: Listener for the Set Status button
+            menu.querySelector('[data-action="setStatus"]').addEventListener('click', () => {
+                const joke = dataStore.getJokeById(parseInt(jokeId));
+                const currentIndex = READINESS_STAGES.indexOf(joke.readinessStatus);
+                const nextIndex = (currentIndex + 1) % READINESS_STAGES.length;
+                joke.readinessStatus = READINESS_STAGES[nextIndex];
+                renderJokeLibrary();
+                closeAllMenus();
+            });
+            menu.querySelector('[data-action="viewHistory"]').addEventListener('click', () => { /* ... */ });
+        }
+
+        function closeAllMenus() { document.querySelectorAll('.joke-menu').forEach(menu => menu.remove()); }
+        document.addEventListener('click', e => { if (!e.target.closest('.joke-menu') && !e.target.closest('[data-action="openMenu"]')) { closeAllMenus(); } });
+
+        // Initial Render
+        renderJokeLibrary();
+    });
+    </script>
+</body>
+</html>

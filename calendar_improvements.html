@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist Calendar - UX Improvement Plan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-surface-2: #334155;
+            --border-color: #475569;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Section */
+        .hero {
+            background: var(--gradient-1);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff" fill-opacity="0.05" points="0,1000 1000,0 1000,1000"/></svg>');
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.9rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Section Headers */
+        .section {
+            margin: 4rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Improvement Cards */
+        .improvements-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .improvement-category {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .improvement-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-3);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .easy-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .medium-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .complex-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .category-badges {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .difficulty-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .easy { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .complex { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .impact-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-surface-2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Feature Lists */
+        .features-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .feature-impact {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .impact-tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-surface-2);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Current Problems Section */
+        .problems-section {
+            background: var(--bg-surface);
+            margin: 4rem -2rem;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .problem-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .problem-card::before {
+            content: '⚠️';
+            font-size: 1.5rem;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        .problem-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fca5a5;
+            margin-bottom: 1rem;
+        }
+
+        .problem-description {
+            color: var(--text-secondary);
+        }
+
+        /* Vision Section */
+        .vision-section {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .vision-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: var(--gradient-3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vision-description {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .vision-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .vision-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .vision-card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: var(--gradient-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .vision-card h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .category-title {
+                font-size: 1.5rem;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .problems-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Setlist Calendar</h1>
+            <p class="hero-subtitle">UX Improvement Plan</p>
+            <p class="hero-description">
+                Transforming a disconnected calendar into a world-class comedy open mic management system that seamlessly integrates with your map application.
+            </p>
+        </div>
+    </div>
+
+    <!-- Current Stats -->
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Critical Issues Found</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">23</div>
+                <div class="stat-label">Improvements Planned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">UX Impact Score</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Problems -->
+    <div class="problems-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Current Critical Problems</h2>
+                <p class="section-subtitle">Major UX issues preventing the calendar from being a seamless companion to your map</p>
+            </div>
+            
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <h3 class="problem-title">Poor Integration</h3>
+                    <p class="problem-description">Calendar feels like a completely separate app. No shared state, inconsistent styling, and confusing navigation between map and calendar views.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3 class="problem-title">Inconsistent Design System</h3>
+                    <p class="problem-description">Different colors, fonts, spacing, and component styles from the main app. Breaks user mental model and feels unprofessional.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3 class="problem-title">Clunky Mobile Experience</h3>
+                    <p class="problem-description">No mobile navigation bar, poor touch targets, and difficult navigation. Doesn't feel native on mobile devices.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <h3 class="problem-title">Inefficient Add-from-Map Flow</h3>
+                    <p class="problem-description">Complex multi-step process to add mics from map to calendar. Should be one-click operation with smart pre-filling.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Easy Improvements -->
+        <div class="section">
+            <div class="improvement-category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <div class="category-icon easy-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <span>Quick Wins</span>
+                    </div>
+                    <div class="category-badges">
+                        <div class="difficulty-badge easy">Easy</div>
+                        <div class="impact-score">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <span>High Impact</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Unify Color System & Typography</h4>
+                            <p class="feature-description">Match exact CSS variables, fonts, and spacing from main app. Replace current dark theme with identical styling to create visual consistency.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Visual Consistency</span>
+                                <span class="impact-tag">Brand Cohesion</span>
+                                <span class="impact-tag">Professional Feel</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Add Persistent Navigation Header</h4>
+                            <p class="feature-description">Add header bar with prominent Map/Calendar toggle buttons, matching main app's navigation patterns. Always visible for easy switching.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Navigation Clarity</span>
+                                <span class="impact-tag">User Flow</span>
+                                <span class="impact-tag">Context Awareness</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Standardize Button Interactions</h4>
+                            <p class="feature-description">Use main app's button styles, hover states, and animations. Consistent pill design, focus states, and interaction feedback.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Interaction Consistency</span>
+                                <span class="impact-tag">Muscle Memory</span>
+                                <span class="impact-tag">Polish</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Add Calendar Access Button to Map</h4>
+                            <p class="feature-description">Prominent calendar icon in main app's interface for easy access. Should be discoverable and match existing UI patterns.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Discoverability</span>
+                                <span class="impact-tag">Quick Access</span>
+                                <span class="impact-tag">Feature Adoption</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Improve Mobile Touch Targets</h4>
+                            <p class="feature-description">Increase button sizes for better mobile usability, add proper spacing, and improve calendar grid touch responsiveness.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Mobile UX</span>
+                                <span class="impact-tag">Accessibility</span>
+                                <span class="impact-tag">Touch Friendliness</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medium Improvements -->
+        <div class="section">
+            <div class="improvement-category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <div class="category-icon medium-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span>Enhanced Integration</span>
+                    </div>
+                    <div class="category-badges">
+                        <div class="difficulty-badge medium">Medium</div>
+                        <div class="impact-score">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <span>Very High Impact</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Streamline Add-from-Map Workflow</h4>
+                            <p class="feature-description">One-click "Add to Calendar" button on map markers. Pre-fill event details, suggest next occurrence date, and provide instant feedback.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Workflow Efficiency</span>
+                                <span class="impact-tag">User Satisfaction</span>
+                                <span class="impact-tag">Feature Usage</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Synchronized Filter States</h4>
+                            <p class="feature-description">Calendar filters remember and sync with map selections. Day, borough, cost filters should be consistent across both views.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">State Consistency</span>
+                                <span class="impact-tag">User Expectations</span>
+                                <span class="impact-tag">Context Preservation</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Mobile Bottom Navigation Bar</h4>
+                            <p class="feature-description">Add mobile-optimized bottom navigation matching main app. Include Map, Calendar, Favorites, and Settings tabs for quick access.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Mobile Navigation</span>
+                                <span class="impact-tag">Platform Consistency</span>
+                                <span class="impact-tag">Thumb-Friendly</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Enhanced Visual Hierarchy</h4>
+                            <p class="feature-description">Improve typography scales, spacing rhythms, and information architecture. Make calendar events more scannable and actionable.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Information Design</span>
+                                <span class="impact-tag">Scannability</span>
+                                <span class="impact-tag">Visual Clarity</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Responsive Calendar Grid</h4>
+                            <p class="feature-description">Adaptive calendar layout that works beautifully on all screen sizes. Smart event overflow handling and improved month/week view transitions.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Responsive Design</span>
+                                <span class="impact-tag">Cross-device UX</span>
+                                <span class="impact-tag">Layout Flexibility</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complex Improvements -->
+        <div class="section">
+            <div class="improvement-category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <div class="category-icon complex-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <span>Advanced Features</span>
+                    </div>
+                    <div class="category-badges">
+                        <div class="difficulty-badge complex">Complex</div>
+                        <div class="impact-score">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <span>Game Changer</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Unified State Management System</h4>
+                            <p class="feature-description">Shared data layer between map and calendar. Real-time sync of favorites, filters, user preferences, and event data across both views.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Architecture</span>
+                                <span class="impact-tag">Data Consistency</span>
+                                <span class="impact-tag">Real-time Sync</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-repeat"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Recurring Events & Smart Scheduling</h4>
+                            <p class="feature-description">Support for weekly recurring mics, intelligent date suggestions, and bulk operations. Handle exceptions and schedule changes gracefully.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Advanced Scheduling</span>
+                                <span class="impact-tag">Recurring Events</span>
+                                <span class="impact-tag">Bulk Operations</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>AI-Powered Mic Suggestions</h4>
+                            <p class="feature-description">Machine learning recommendations based on performance history, location preferences, and success patterns. Suggest optimal mic choices.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Personalization</span>
+                                <span class="impact-tag">ML Recommendations</span>
+                                <span class="impact-tag">Performance Optimization</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-hand-rock"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Advanced Touch Gestures</h4>
+                            <p class="feature-description">Swipe navigation between dates, pinch-to-zoom calendar view, pull-to-refresh, and haptic feedback for key interactions.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Gesture Navigation</span>
+                                <span class="impact-tag">Native Feel</span>
+                                <span class="impact-tag">Haptic Feedback</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Performance Analytics & Insights</h4>
+                            <p class="feature-description">Track performance trends, venue success rates, and setlist effectiveness. Visual dashboards with actionable insights for improvement.</p>
+                            <div class="feature-impact">
+                                <span class="impact-tag">Analytics</span>
+                                <span class="impact-tag">Performance Tracking</span>
+                                <span class="impact-tag">Data Visualization</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vision Section -->
+        <div class="vision-section">
+            <h2 class="vision-title">The Vision</h2>
+            <p class="vision-description">
+                Transform the calendar into the best comedy open mic management tool available - better than Google Calendar for this specific use case, with seamless map integration and intelligent features that understand comedy performance workflows.
+            </p>
+            
+            <div class="vision-features">
+                <div class="vision-card">
+                    <div class="vision-card-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4>Lightning Fast</h4>
+                    <p>One-click operations, instant feedback, and smooth transitions. No waiting, no friction - just pure efficiency.</p>
+                </div>
+                
+                <div class="vision-card">
+                    <div class="vision-card-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h4>Seamlessly Integrated</h4>
+                    <p>Feels like one cohesive app, not two separate tools. Shared context and consistent experience throughout.</p>
+                </div>
+                
+                <div class="vision-card">
+                    <div class="vision-card-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Mobile First</h4>
+                    <p>Designed for comedians on the go. Touch-optimized, thumb-friendly, and works perfectly on any device.</p>
+                </div>
+                
+                <div class="vision-card">
+                    <div class="vision-card-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Intelligently Helpful</h4>
+                    <p>Smart suggestions, learning from your patterns, and anticipating your needs. Like having a personal comedy assistant.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add fade-in animations as elements come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all major sections
+        document.querySelectorAll('.improvement-category, .problem-card, .vision-card, .stat-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

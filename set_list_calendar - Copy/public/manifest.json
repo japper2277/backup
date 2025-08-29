@@ -1,0 +1,78 @@
+{
+  "name": "Collaborative Setlist Builder",
+  "short_name": "Setlist Builder",
+  "description": "A real-time collaborative joke and setlist management application for comedians",
+  "start_url": "/react-demo.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1DB954",
+  "background_color": "#121212",
+  "categories": ["entertainment", "productivity", "social"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Setlist builder with joke bank"
+    },
+    {
+      "src": "/screenshots/mobile-setlist.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobile setlist management"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Joke",
+      "short_name": "Add Joke",
+      "description": "Quickly add a new joke to your collection",
+      "url": "/react-demo.html?action=new-joke",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "New Setlist",
+      "short_name": "New Set",
+      "description": "Create a new setlist for your performance",
+      "url": "/react-demo.html?action=new-setlist", 
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/react-demo.html?share",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+setlist",
+      "url": "/react-demo.html?setlist=%s"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "handle_links": "preferred",
+  "scope": "/",
+  "id": "collaborative-setlist-builder",
+  "related_applications": []
+}

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist Builder - Integrated</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #121212;
+            --bg-surface: #181818;
+            --bg-surface-2: #282828;
+            --bg-input: #2a2d3e;
+            --border-color: #3e4042;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-green: #1DB954;
+            --accent-blue: #45a3ff;
+            --accent-orange: #f5c518;
+            --accent-purple: #9d6cff;
+            --accent-red: #ef4444;
+            --status-idea: #808080;
+            --status-workshopping: #f5c518;
+            --status-tight5: #45a3ff;
+            --status-showready: #1DB954;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        body { 
+            font-family: var(--font-sans); 
+            background-color: var(--bg-main); 
+            color: var(--text-primary); 
+            margin: 0; 
+            padding: 2rem; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+
+        .app-container { 
+            max-width: 1100px; 
+            width: 100%; 
+            background: var(--bg-surface); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        }
+        
+        h1 { text-align: center; margin-top: 0; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        .form-btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+        .btn-secondary { background-color: var(--bg-surface-2); color: var(--text-secondary); border-color: var(--border-color); }
+        .btn-primary { background-color: var(--accent-blue); color: #ffffff; }
+
+        /* --- Setlist Builder Core Layout --- */
+        .setlist-builder { border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-surface); min-height: 500px; }
+        .setlist-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; height: 600px; }
+
+        /* --- Right Panel: Current Setlist --- */
+        .current-setlist-panel { background: var(--bg-main); display: flex; flex-direction: column; }
+        .current-setlist { flex: 1; overflow-y: auto; padding: 0.5rem; transition: background-color 0.2s; }
+        .setlist-item { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; transition: all 0.2s ease; position: relative; display: flex; align-items: center; gap: 0.75rem; }
+        .empty-setlist { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 2rem; }
+        .empty-setlist i { font-size: 2rem; margin-bottom: 1rem; opacity: 0.5; }
+        .drag-handle { cursor: grab; color: var(--text-secondary); opacity: 0.5; transition: opacity 0.2s; }
+        .setlist-item:hover .drag-handle { opacity: 1; }
+        .setlist-item-number { font-size: 0.9rem; font-weight: 700; color: var(--accent-green); border: 2px solid var(--accent-green); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .setlist-item-content { flex-grow: 1; }
+        .joke-item-text { font-size: 0.9rem; line-height: 1.3; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .performance-note-icon { color: var(--text-secondary); cursor: pointer; margin-left: auto; opacity: 0.6; }
+        .performance-note-icon:hover { opacity: 1; color: var(--accent-orange); }
+        .performance-note-input { display: none; width: 100%; margin-top: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; font-size: 0.8rem; color: var(--text-primary); }
+        .performance-note-input.active { display: block; }
+
+        /* Drag & Drop Feedback Styles */
+        .sortable-ghost { opacity: 0.4; background: var(--bg-surface-2); border: 1px dashed var(--accent-blue); }
+        .current-setlist.drag-over { background-color: rgba(69, 163, 255, 0.05); }
+
+        /* --- Left Panel: JokeFlix Library --- */
+        .joke-bank-panel { background: var(--bg-main); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        .panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); background: var(--bg-surface-2); display: flex; justify-content: space-between; align-items: center; position: relative; flex-shrink: 0; }
+        .panel-header h4 { margin: 0; font-size: 0.9rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .view-options-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1rem; padding: 0.25rem; }
+        .view-options-popover { position: absolute; top: 100%; right: 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transform-origin: top right; transition: transform 0.15s ease-out, opacity 0.15s ease-out; transform: scale(0.9); opacity: 0; visibility: hidden; }
+        .view-options-popover.visible { transform: scale(1); opacity: 1; visibility: visible; }
+        .lock-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .lock-group label { margin: 0; font-weight: normal; font-size: 0.9rem; }
+        .panel-actions { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .panel-actions input { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-primary); font-size: 0.95rem; font-family: inherit; box-sizing: border-box; }
+        .filter-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .filter-group label { font-size: 0.7rem; color: var(--text-secondary); }
+        .filter-bar select { width: 100%; background-color: var(--bg-surface-2); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-size: 0.8rem; padding: 0.25rem; }
+        .joke-bank-list { flex: 1; overflow-y: auto; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+        /* JokeFlix Card Styles */
+        .joke-bank-item { background: var(--bg-surface-2); border-radius: 6px; padding: 0.75rem; transition: background-color 0.2s ease, transform 0.15s ease-out; position: relative; border-left: 3px solid transparent; cursor: grab; }
+        .joke-bank-item:hover { background-color: var(--bg-surface); transform: scale(1.01); }
+        .joke-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-right: 2.5rem; pointer-events: none; }
+        .joke-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); flex: 1; margin-right: 1rem; }
+        .last-performed-compact { font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; }
+        .joke-card-footer { display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+        .pills-container { display: flex; align-items: center; gap: 0.5rem; }
+        .pills-container > * { opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .joke-bank-item:hover .pills-container > * { opacity: 1; }
+        .left-locked .pills-container .left-meta, .right-locked .pills-container .right-meta { opacity: 1; }
+        .left-meta, .right-meta { display: flex; align-items: center; gap: 0.5rem; }
+        .metadata-pill { padding: 0.125rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; color: white; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .status-pill { background-color: var(--status-idea); }
+        .status-Workshopping { background-color: var(--status-workshopping); }
+        .status-Tight-5-Ready { background-color: var(--status-tight5); }
+        .status-Show-Ready { background-color: var(--status-showready); }
+        .type-pill { background-color: var(--accent-blue); }
+        .clean-pill { background-color: var(--accent-green); }
+        .joke-menu-btn { position: absolute; bottom: 0.5rem; right: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; opacity: 0; transition: all 0.2s; background: none; border: none; padding: 0.25rem; border-radius: 3px; }
+        .joke-bank-item:hover .joke-menu-btn { opacity: 1; background: var(--bg-surface); }
+        .joke-menu-btn:hover { background: var(--bg-main) !important; color: var(--text-primary); }
+
+        /* Context Menu Styles */
+        .context-menu-item { background: none; border: none; color: var(--text-primary); padding: 0.5rem 1rem; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+        .context-menu-item:hover { background-color: var(--bg-surface-2); }
+        .context-menu-item i { width: 16px; text-align: center; color: var(--text-secondary); }
+        
+        @keyframes quick-flash { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .flash-feedback { animation: quick-flash 0.3s ease-in-out; }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>Build Your Setlist</h1>
+        
+        <div class="setlist-builder">
+            <div class="setlist-panels">
+                
+                <div class="joke-bank-panel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-book-open"></i> Your Jokes</h4>
+                        <button class="view-options-btn" title="View Options"><i class="fas fa-cog"></i></button>
+                        <div class="view-options-popover" id="viewOptionsPopover">
+                            <label style="font-weight: 600; display: block; margin-bottom: 0.75rem;">Lock Pill Visibility</label>
+                            <div class="lock-group">
+                                <input type="checkbox" id="lockLeftPill" checked>
+                                <label for="lockLeftPill">Status Pill (Left)</label>
+                            </div>
+                            <div class="lock-group">
+                                <input type="checkbox" id="lockRightPills">
+                                <label for="lockRightPills">Metadata Pills (Right)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-actions">
+                        <input type="search" id="jokeSearch" placeholder="Search your jokes...">
+                    </div>
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>Sort by</label>
+                            <select id="sortBy">
+                                <option value="title">Title (A-Z)</option>
+                                <option value="lastPerformed">Recently Performed</option>
+                                <option value="status">Readiness Status</option>
+                                <option value="type">Joke Type</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Joke Type</label>
+                            <select id="filterType">
+                                <option value="all">All Types</option>
+                                <option value="One-liner">One-liner</option>
+                                <option value="Story">Story</option>
+                                <option value="Observational">Observational</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="joke-bank-list left-locked" id="jokeBankList">
+                        </div>
+                </div>
+                
+                <div class="current-setlist-panel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-list"></i> Current Setlist</h4>
+                        <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            <span id="jokeCount">0 jokes</span>
+                            <span id="totalDuration">0:00</span>
+                        </div>
+                    </div>
+                    <div class="current-setlist" id="currentSetlist">
+                        </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="form-btn btn-secondary">Cancel</button>
+            <button class="form-btn btn-primary">Save Set</button>
+        </div>
+    </div>
+
+    <div id="jokeMenu" style="display: none; position: absolute; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000;">
+        <button class="context-menu-item" data-action="set-status"><i class="fas fa-traffic-light"></i> Cycle Status</button>
+        <button class="context-menu-item" data-action="edit-joke"><i class="fas fa-pencil-alt"></i> Edit Joke</button>
+        <button class="context-menu-item" data-action="view-history"><i class="fas fa-history"></i> View History</button>
+        <button class="context-menu-item" data-action="duplicate"><i class="fas fa-copy"></i> Duplicate</button>
+        <hr style="border-color: var(--border-color); margin: 0.5rem 0;">
+        <button class="context-menu-item" data-action="archive" style="color: var(--accent-orange);"><i class="fas fa-archive"></i> Archive</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA STORE (Simulated) ---
+        const dataStore = {
+            jokes: [
+                { id: 101, title: 'Airplane Food Bit', text: 'Classic opener', jokeType: 'Observational', readinessStatus: 'Show Ready', isClean: true, estimated_duration: 60, lastPerformed: { venue: 'Laugh Factory', date: '2025-08-19' }},
+                { id: 102, title: 'Coffee Shop Rant', text: 'Good for younger crowds', jokeType: 'Story', readinessStatus: 'Workshopping', isClean: false, estimated_duration: 75, lastPerformed: { venue: 'Comedy Store', date: '2025-08-12' }},
+                { id: 103, title: 'Lazy Cat Hire', text: 'Follows the cat joke', jokeType: 'One-liner', readinessStatus: 'Tight 5 Ready', isClean: true, estimated_duration: 50, lastPerformed: { venue: 'Open Mic Night', date: '2025-08-15' }},
+                { id: 104, title: 'Corporate Clean Bit', text: 'Safe for work events', jokeType: 'Observational', readinessStatus: 'Show Ready', isClean: true, estimated_duration: 90, lastPerformed: null },
+                { id: 105, title: 'New 5 Min Chunk', text: 'Still needs work on the punchline', jokeType: 'Story', readinessStatus: 'Idea', isClean: false, estimated_duration: 300, lastPerformed: null },
+            ],
+            getAllJokes: function() { return this.jokes; },
+            getJokeById: function(id) { return this.jokes.find(j => j.id === id); },
+        };
+
+        // --- STATE & DOM REFS ---
+        let currentSetlist = [];
+        let isLeftLocked = true;
+        let isRightLocked = false;
+        const READINESS_STAGES = ['Idea', 'Workshopping', 'Tight 5 Ready', 'Show Ready'];
+
+        const jokeBankEl = document.getElementById('jokeBankList');
+        const setlistEl = document.getElementById('currentSetlist');
+        const viewOptionsBtn = document.querySelector('.view-options-btn');
+        const viewOptionsPopover = document.getElementById('viewOptionsPopover');
+        const lockLeftCheck = document.getElementById('lockLeftPill');
+        const lockRightCheck = document.getElementById('lockRightPills');
+        const searchInput = document.getElementById('jokeSearch');
+        const sortSelect = document.getElementById('sortBy');
+        const filterSelect = document.getElementById('filterType');
+        const jokeMenu = document.getElementById('jokeMenu');
+
+        // --- JOKEFLIX (LEFT PANEL) FUNCTIONS ---
+        function closeAllPopups() {
+            viewOptionsPopover.classList.remove('visible');
+            jokeMenu.style.display = 'none';
+        }
+
+        function syncUI() {
+            jokeBankEl.classList.toggle('left-locked', isLeftLocked);
+            jokeBankEl.classList.toggle('right-locked', isRightLocked);
+            lockLeftCheck.checked = isLeftLocked;
+            lockRightCheck.checked = isRightLocked;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
+        function getStatusIcon(status) {
+            const icons = { 'Idea': 'fa-lightbulb', 'Workshopping': 'fa-tools', 'Tight 5 Ready': 'fa-microphone', 'Show Ready': 'fa-star' };
+            return icons[status] || 'fa-lightbulb';
+        }
+
+        function filterAndSortJokes() {
+            const jokesInSet = new Set(currentSetlist.map(item => item.id));
+            let jokes = dataStore.getAllJokes().filter(j => !jokesInSet.has(j.id));
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                jokes = jokes.filter(j => j.title.toLowerCase().includes(searchTerm) || j.jokeType.toLowerCase().includes(searchTerm));
+            }
+
+            const filterType = filterSelect.value;
+            if (filterType !== 'all') {
+                jokes = jokes.filter(joke => joke.jokeType === filterType);
+            }
+
+            const sortBy = sortSelect.value;
+            jokes.sort((a, b) => {
+                switch (sortBy) {
+                    case 'title': return a.title.localeCompare(b.title);
+                    case 'lastPerformed':
+                        if (!a.lastPerformed) return 1; if (!b.lastPerformed) return -1;
+                        return new Date(b.lastPerformed.date) - new Date(a.lastPerformed.date);
+                    case 'status': return READINESS_STAGES.indexOf(b.readinessStatus) - READINESS_STAGES.indexOf(a.readinessStatus);
+                    case 'type': return a.jokeType.localeCompare(b.jokeType);
+                    default: return 0;
+                }
+            });
+            renderJokes(jokes);
+        }
+
+        function renderJokes(jokesToRender) {
+            jokeBankEl.innerHTML = jokesToRender.map(joke => {
+                const statusClass = joke.readinessStatus.replace(/ /g, '-');
+                const statusIcon = getStatusIcon(joke.readinessStatus);
+                const lastPerformedHTML = joke.lastPerformed ? `${formatDate(joke.lastPerformed.date)} • ${joke.lastPerformed.venue}` : '<span style="color: var(--text-secondary); font-style: italic;">Never</span>';
+                return `
+                    <div class="joke-bank-item" data-joke-id="${joke.id}">
+                        <button class="joke-menu-btn" title="Joke Actions" data-joke-id="${joke.id}"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="joke-card-header">
+                            <div class="joke-title">${joke.title}</div>
+                            <div class="last-performed-compact">${lastPerformedHTML}</div>
+                        </div>
+                        <div class="joke-card-footer">
+                            <div class="pills-container">
+                                <div class="left-meta"><div class="metadata-pill status-pill status-${statusClass}"><i class="fas ${statusIcon}"></i><span>${joke.readinessStatus}</span></div></div>
+                                <div class="right-meta">
+                                    <div class="metadata-pill type-pill"><i class="fas fa-book-open"></i><span>${joke.jokeType}</span></div>
+                                    ${joke.isClean ? '<div class="metadata-pill clean-pill"><i class="fas fa-soap"></i><span>Clean</span></div>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+            syncUI();
+        }
+
+        // --- SETLIST (RIGHT PANEL) FUNCTIONS ---
+        function renderCurrentSetlist() {
+            if (currentSetlist.length === 0) {
+                setlistEl.innerHTML = `<div class="empty-setlist"><i class="fas fa-arrow-left"></i><p>Drag jokes here</p></div>`;
+            } else {
+                setlistEl.innerHTML = currentSetlist.map((item, index) => {
+                    const joke = dataStore.getJokeById(item.id);
+                    return createSetlistItem(joke, item, index + 1);
+                }).join('');
+            }
+            updateStats();
+        }
+        
+        function createSetlistItem(joke, item, position) {
+            return `
+                <div class="setlist-item" data-joke-id="${joke.id}">
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <div class="setlist-item-number">${position}</div>
+                    <div class="setlist-item-content">
+                        <div class="joke-item-text">${joke.title}</div>
+                        <input type="text" class="performance-note-input ${item.perfNote ? 'active' : ''}" placeholder="Add performance note..." value="${item.perfNote}" data-joke-id="${joke.id}">
+                    </div>
+                    <i class="fas fa-comment-dots performance-note-icon" title="Add performance note"></i>
+                </div>`;
+        }
+
+        function updateStats() {
+            const totalJokes = currentSetlist.length;
+            const totalSeconds = currentSetlist.reduce((sum, item) => sum + (dataStore.getJokeById(item.id)?.estimated_duration || 0), 0);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            document.getElementById('jokeCount').textContent = `${totalJokes} jokes`;
+            document.getElementById('totalDuration').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // --- EVENT LISTENERS ---
+        viewOptionsBtn.addEventListener('click', (e) => { e.stopPropagation(); viewOptionsPopover.classList.toggle('visible'); });
+        lockLeftCheck.addEventListener('change', () => { isLeftLocked = lockLeftCheck.checked; syncUI(); });
+        lockRightCheck.addEventListener('change', () => { isRightLocked = lockRightCheck.checked; syncUI(); });
+        searchInput.addEventListener('input', filterAndSortJokes);
+        sortSelect.addEventListener('change', filterAndSortJokes);
+        filterSelect.addEventListener('change', filterAndSortJokes);
+
+        jokeBankEl.addEventListener('click', (e) => {
+            const menuBtn = e.target.closest('.joke-menu-btn');
+            if (menuBtn) {
+                e.stopPropagation();
+                showJokeMenu(menuBtn, parseInt(menuBtn.dataset.jokeId));
+            }
+        });
+
+        function showJokeMenu(button, jokeId) {
+            closeAllPopups();
+            const btnRect = button.getBoundingClientRect();
+            jokeMenu.style.display = 'block';
+            jokeMenu.style.top = `${btnRect.bottom + 5}px`;
+            jokeMenu.style.left = `${btnRect.right - jokeMenu.offsetWidth}px`;
+            jokeMenu.dataset.jokeId = jokeId;
+        }
+
+        jokeMenu.addEventListener('click', (e) => {
+            const action = e.target.closest('.context-menu-item')?.dataset.action;
+            const jokeId = parseInt(jokeMenu.dataset.jokeId);
+            if (!action || !jokeId) return;
+            const joke = dataStore.getJokeById(jokeId);
+            
+            switch (action) {
+                case 'set-status':
+                    joke.readinessStatus = READINESS_STAGES[(READINESS_STAGES.indexOf(joke.readinessStatus) + 1) % READINESS_STAGES.length];
+                    break;
+                case 'duplicate':
+                    const newJoke = { ...joke, id: Date.now(), title: joke.title + ' (Copy)' };
+                    dataStore.jokes.push(newJoke);
+                    break;
+                case 'archive':
+                    if (confirm(`Archive "${joke.title}"?`)) {
+                        dataStore.jokes = dataStore.jokes.filter(j => j.id !== jokeId);
+                    }
+                    break;
+                default: alert(`Action '${action}' on "${joke.title}"`);
+            }
+            filterAndSortJokes();
+            closeAllPopups();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#viewOptionsPopover, .view-options-btn, #jokeMenu, .joke-menu-btn')) {
+                closeAllPopups();
+            }
+        });
+
+        setlistEl.addEventListener('click', e => {
+            if (e.target.classList.contains('performance-note-icon')) {
+                const input = e.target.previousElementSibling.querySelector('.performance-note-input');
+                input.classList.toggle('active');
+                if (input.classList.contains('active')) input.focus();
+            }
+        });
+        
+        setlistEl.addEventListener('input', e => {
+            if (e.target.classList.contains('performance-note-input')) {
+                const itemInSetlist = currentSetlist.find(item => item.id === parseInt(e.target.dataset.jokeId));
+                if (itemInSetlist) itemInSetlist.perfNote = e.target.value;
+            }
+        });
+
+        // --- DRAG-AND-DROP SETUP ---
+        new Sortable(jokeBankEl, {
+            group: { name: 'setlist', pull: 'clone', put: false },
+            sort: false,
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+        });
+
+        new Sortable(setlistEl, {
+            group: 'setlist',
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onStart: () => setlistEl.classList.add('drag-over'),
+            onEnd: () => setlistEl.classList.remove('drag-over'),
+            onAdd: (evt) => {
+                const jokeId = parseInt(evt.item.dataset.jokeId);
+                currentSetlist.splice(evt.newIndex, 0, { id: jokeId, perfNote: '' });
+                renderCurrentSetlist();
+                filterAndSortJokes(); // Re-render joke bank to remove the added item
+            },
+            onUpdate: (evt) => {
+                const movedItem = currentSetlist.splice(evt.oldIndex, 1)[0];
+                currentSetlist.splice(evt.newIndex, 0, movedItem);
+                renderCurrentSetlist();
+            }
+        });
+
+        // --- INITIAL RENDER ---
+        filterAndSortJokes();
+        renderCurrentSetlist();
+    });
+    </script>
+</body>
+</html>

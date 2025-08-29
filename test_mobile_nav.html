@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Nav Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/utils.js"></script>
+    <script src="js/mobile.js"></script>
+    <script src="js/mobile-nav.js"></script>
+</head>
+<body>
+    <!-- Simulate mobile bottom bar -->
+    <div id="bottom-bar">
+        <div class="bottom-bar-content">
+            <div class="bottom-bar-left">
+                <div class="bottom-bar-info">
+                    <div class="title" id="bottom-selection-title">No mic selected</div>
+                    <div class="subtitle" id="bottom-selection-subtitle">Tap a marker to see details</div>
+                </div>
+            </div>
+            <div class="bottom-bar-center">
+                <button id="favorites-btn">Favorites</button>
+                <button id="filters-btn">Filters</button>
+            </div>
+            <div class="bottom-bar-right">
+                <button id="list-view-btn">List</button>
+                <button id="directions-bottom-btn">Directions</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="test-results"></div>
+    
+    <script>
+        // Mock dependencies
+        window.MicFinderState = {
+            getActiveFilters: () => ({}),
+            setActiveFilters: () => {},
+            getAllMics: () => []
+        };
+        window.MicFinderFilters = {
+            saveFilterState: () => {}
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.getElementById('test-results');
+            
+            // Test if mobile nav module loaded
+            const mobileNavModule = window.MicFinderMobileNav ? 'Loaded' : 'Not loaded';
+            results.innerHTML += '<p>Mobile Nav Module: ' + mobileNavModule + '</p>';
+            
+            // Test functions exist
+            if (window.MicFinderMobileNav) {
+                const functions = [
+                    'setSelectedMic',
+                    'getSelectedMicId', 
+                    'updateBottomBarSelection',
+                    'openFiltersModal',
+                    'toggleListView',
+                    'openDirections'
+                ];
+                
+                functions.forEach(func => {
+                    const exists = typeof window.MicFinderMobileNav[func] === 'function';
+                    results.innerHTML += '<p>' + func + ': ' + (exists ? 'Available' : 'Missing') + '</p>';
+                });
+            }
+            
+            console.log('Mobile nav test completed');
+        });
+    </script>
+</body>
+</html>

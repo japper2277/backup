@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Filter Pills Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-surface: #232533;
+            --bg-primary: #1a1d29;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --pill-bg: linear-gradient(90deg, #444857 0%, #232533 100%);
+            --pill-hover: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+            --pill-editing: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--bg-surface);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .demo-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Base pill styles */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--pill-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px 0 rgba(30, 41, 59, 0.10);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            user-select: none;
+        }
+        
+        /* Hover state */
+        .pill:hover {
+            background: var(--pill-hover);
+            box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        /* Editing state */
+        .pill.editing {
+            background: var(--pill-editing);
+            box-shadow: 0 4px 16px 0 rgba(245, 158, 11, 0.2);
+            transform: scale(1.02);
+        }
+        
+        /* Edit indicator icon */
+        .pill-edit-icon {
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pill:hover .pill-edit-icon {
+            opacity: 1;
+        }
+        
+        /* Old pill style for comparison */
+        .pill-old {
+            background: var(--pill-bg);
+            color: var(--text-primary);
+        }
+        
+        .pill-old:hover {
+            background: var(--pill-hover);
+        }
+        
+        .pill-remove {
+            margin-left: 0.5rem;
+            font-size: 1rem;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pill-old:hover .pill-remove {
+            opacity: 1;
+        }
+        
+        /* Dropdown styles */
+        .pill-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        
+        /* Enhanced dropdown styles */
+        .dropdown-header {
+            padding: 1rem 1rem 0.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        .dropdown-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .dropdown-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .dropdown-content {
+            padding: 0 1rem 1rem 1rem;
+        }
+        
+        .dropdown-section {
+            margin-bottom: 1rem;
+        }
+        
+        .dropdown-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dropdown-section-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Special styling for time picker dropdown - wider and centered */
+        .pill[data-type="time"] .pill-dropdown {
+            width: 280px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%) translateY(-10px);
+            max-width: calc(100vw - 2rem);
+        }
+        
+        .pill[data-type="time"] .pill-dropdown.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .pill-dropdown.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .dropdown-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+        }
+        
+        .dropdown-option:last-child {
+            margin-bottom: 0;
+        }
+        
+        .dropdown-option:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+        
+        .dropdown-option.selected {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .dropdown-option-check {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .dropdown-option.selected .dropdown-option-check {
+            opacity: 1;
+        }
+        
+        /* Day grid layout */
+        .day-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.375rem;
+        }
+        
+        .day-option {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+        
+        .day-option:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+        }
+        
+        .day-option.selected {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+        
+        /* Quick day presets */
+        .day-presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .day-preset-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+            min-width: fit-content;
+        }
+        
+        .day-preset-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+            color: var(--text-primary);
+        }
+        
+        /* Dropdown actions */
+        .dropdown-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .dropdown-btn {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+        }
+        
+        .dropdown-btn.primary {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+        
+        .dropdown-btn.primary:hover {
+            background: #4f46e5;
+        }
+        
+        /* Time picker styles */
+        .time-picker {
+            padding: 1.25rem;
+        }
+        
+        .time-picker-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .time-picker-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .time-picker-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .time-inputs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .time-input-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 35px;
+            text-align: right;
+        }
+        
+        .time-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            width: 120px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .time-input:hover {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .time-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .time-presets {
+            margin-bottom: 1.25rem;
+        }
+        
+        .time-presets-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .time-presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .time-preset-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .time-preset-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+            color: var(--text-primary);
+        }
+        
+        .time-picker-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: space-between;
+        }
+        
+        .time-picker-btn {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .time-picker-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+        }
+        
+        .time-picker-btn.primary {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+        
+        .time-picker-btn.primary:hover {
+            background: #4f46e5;
+        }
+        
+        /* Toggle styles for favorites */
+        .pill.toggle-pill {
+            background: var(--pill-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pill.toggle-pill.active {
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            animation: favoritesPulse 0.6s ease-out;
+        }
+        
+        .pill.toggle-pill .toggle-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .pill.toggle-pill.active .toggle-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        }
+        
+        @keyframes favoritesPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Feedback text for favorites */
+        .favorites-feedback {
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .favorites-feedback.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-0.25rem);
+        }
+        
+        /* Demo comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .comparison-side {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        /* Interactive states demo */
+        .state-demo {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .state-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .pills-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Main Demo Section -->
+        <div class="demo-section">
+            <h1 class="demo-title">Editable Filter Pills Demo</h1>
+            <p class="demo-subtitle">Click on any pill to edit its value. No more X buttons - just click to change!</p>
+            
+            <div class="pills-container">
+                <div class="pill" data-type="day" data-value="Wednesday">
+                    Wednesday
+                    <i class="fa-solid fa-chevron-down pill-edit-icon"></i>
+                    <div class="pill-dropdown">
+                        <div class="dropdown-option" data-value="Monday">Monday</div>
+                        <div class="dropdown-option" data-value="Tuesday">Tuesday</div>
+                        <div class="dropdown-option selected" data-value="Wednesday">Wednesday</div>
+                        <div class="dropdown-option" data-value="Thursday">Thursday</div>
+                        <div class="dropdown-option" data-value="Friday">Friday</div>
+                        <div class="dropdown-option" data-value="Saturday">Saturday</div>
+                        <div class="dropdown-option" data-value="Sunday">Sunday</div>
+                        <div class="dropdown-option" data-value="">Any Day</div>
+                    </div>
+                </div>
+                
+                <div class="pill" data-type="time" data-value="10:00 AM - 6:00 PM">
+                    10:00 AM - 6:00 PM
+                    <i class="fa-solid fa-clock pill-edit-icon"></i>
+                    <div class="pill-dropdown">
+                        <div class="time-picker">
+                            <div class="time-inputs-container">
+                                <div class="time-input-group">
+                                    <span class="time-input-label">From:</span>
+                                    <input type="time" class="time-input" value="10:00">
+                                </div>
+                                <div class="time-input-group">
+                                    <span class="time-input-label">To:</span>
+                                    <input type="time" class="time-input" value="18:00">
+                                </div>
+                            </div>
+                            
+                            <div class="time-presets">
+                                <div class="time-presets-grid">
+                                    <button class="time-preset-btn" data-preset="morning">Morning</button>
+                                    <button class="time-preset-btn" data-preset="afternoon">Afternoon</button>
+                                    <button class="time-preset-btn" data-preset="evening">Evening</button>
+                                    <button class="time-preset-btn" data-preset="all-day">All Day</button>
+                                </div>
+                            </div>
+                            
+                            <div class="time-picker-actions">
+                                <button class="time-picker-btn close-time-picker">Done</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pill" data-type="location" data-value="Manhattan">
+                    Manhattan
+                    <i class="fa-solid fa-map-marker pill-edit-icon"></i>
+                    <div class="pill-dropdown">
+                        <div class="dropdown-option selected" data-value="Manhattan">Manhattan</div>
+                        <div class="dropdown-option" data-value="Brooklyn">Brooklyn</div>
+                        <div class="dropdown-option" data-value="Queens">Queens</div>
+                        <div class="dropdown-option" data-value="Bronx">Bronx</div>
+                        <div class="dropdown-option" data-value="Staten Island">Staten Island</div>
+                        <div class="dropdown-option" data-value="">All Boroughs</div>
+                    </div>
+                </div>
+                
+                <div class="pill" data-type="cost" data-value="Free">
+                    Free
+                    <i class="fa-solid fa-dollar-sign pill-edit-icon"></i>
+                    <div class="pill-dropdown">
+                        <div class="dropdown-option selected" data-value="free">Free</div>
+                        <div class="dropdown-option" data-value="1 drink min">1 Drink Min</div>
+                        <div class="dropdown-option" data-value="paid">Paid Entry</div>
+                        <div class="dropdown-option" data-value="">All Costs</div>
+                    </div>
+                </div>
+                
+                <div class="pill toggle-pill" data-type="favorites" data-value="true">
+                    <i class="fa-solid fa-star toggle-icon"></i>
+                    Favorites Only
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparison Section -->
+        <div class="demo-section">
+            <h2 class="demo-title">Before vs After Comparison</h2>
+            
+            <div class="comparison">
+                <div class="comparison-side">
+                    <h3 class="comparison-title">❌ Old Pills (with X)</h3>
+                    <p class="demo-subtitle">Current implementation - click X to remove only</p>
+                    
+                    <div class="pills-container">
+                        <div class="pill pill-old">
+                            Wednesday
+                            <span class="pill-remove">×</span>
+                        </div>
+                        <div class="pill pill-old">
+                            10:00 AM - 6:00 PM
+                            <span class="pill-remove">×</span>
+                        </div>
+                        <div class="pill pill-old">
+                            Manhattan
+                            <span class="pill-remove">×</span>
+                        </div>
+                    </div>
+                    
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                        ⚠️ Issues: Users can only remove filters, not edit them. To change Wednesday to Thursday, they must remove the pill and re-apply through the modal.
+                    </p>
+                </div>
+                
+                <div class="comparison-side">
+                    <h3 class="comparison-title">✅ New Pills (editable)</h3>
+                    <p class="demo-subtitle">Proposed design - click to edit values directly</p>
+                    
+                    <div class="pills-container">
+                        <div class="pill">
+                            Wednesday
+                            <i class="fa-solid fa-chevron-down pill-edit-icon"></i>
+                        </div>
+                        <div class="pill">
+                            10:00 AM - 6:00 PM
+                            <i class="fa-solid fa-clock pill-edit-icon"></i>
+                        </div>
+                        <div class="pill">
+                            Manhattan
+                            <i class="fa-solid fa-map-marker pill-edit-icon"></i>
+                        </div>
+                    </div>
+                    
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                        ✅ Benefits: Direct editing, cleaner interface, better UX. Users can quickly change Wednesday to Thursday with one click.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- States Demo -->
+        <div class="demo-section">
+            <h2 class="demo-title">Interactive States</h2>
+            <p class="demo-subtitle">See how pills look in different interaction states</p>
+            
+            <div class="state-demo">
+                <div>
+                    <div class="state-label">Default</div>
+                    <div class="pill">Wednesday <i class="fa-solid fa-chevron-down pill-edit-icon"></i></div>
+                </div>
+                
+                <div>
+                    <div class="state-label">Hover (try it!)</div>
+                    <div class="pill">Wednesday <i class="fa-solid fa-chevron-down pill-edit-icon"></i></div>
+                </div>
+                
+                <div>
+                    <div class="state-label">Editing</div>
+                    <div class="pill editing">Wednesday <i class="fa-solid fa-chevron-down pill-edit-icon"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usage Examples -->
+        <div class="demo-section">
+            <h2 class="demo-title">Usage Examples</h2>
+            <p class="demo-subtitle">Common editing scenarios</p>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Scenario 1: Change day filter</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">User wants to see Thursday mics instead of Wednesday</p>
+                <div class="pills-container">
+                    <div class="pill demo-pill" data-demo="day-change">
+                        Wednesday → Thursday
+                        <i class="fa-solid fa-chevron-down pill-edit-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Scenario 2: Adjust time range</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">User wants evening mics only</p>
+                <div class="pills-container">
+                    <div class="pill demo-pill" data-demo="time-change">
+                        10:00 AM - 11:45 PM → 6:00 PM - 11:45 PM
+                        <i class="fa-solid fa-clock pill-edit-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Scenario 3: Toggle favorites</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">Quick on/off for favorites filter</p>
+                <div class="pills-container">
+                    <div class="pill toggle-pill demo-toggle" data-demo="favorites-toggle">
+                        <i class="fa-solid fa-star"></i>
+                        Favorites Only
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functionality for the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle pill clicks
+            document.querySelectorAll('.pill[data-type]').forEach(pill => {
+                pill.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Close any open dropdowns
+                    document.querySelectorAll('.pill-dropdown.visible').forEach(dropdown => {
+                        dropdown.classList.remove('visible');
+                        dropdown.parentElement.classList.remove('editing');
+                    });
+                    
+                    const dropdown = this.querySelector('.pill-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.add('visible');
+                        this.classList.add('editing');
+                    }
+                });
+            });
+            
+            // Handle dropdown option clicks
+            document.querySelectorAll('.dropdown-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const pill = this.closest('.pill');
+                    const dropdown = this.closest('.pill-dropdown');
+                    const value = this.dataset.value;
+                    const displayText = this.textContent.trim();
+                    
+                    // Update pill content
+                    const icon = pill.querySelector('.pill-edit-icon');
+                    pill.innerHTML = '';
+                    pill.appendChild(document.createTextNode(displayText || 'All'));
+                    pill.appendChild(icon);
+                    
+                    // Update selected state
+                    dropdown.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    // Close dropdown
+                    dropdown.classList.remove('visible');
+                    pill.classList.remove('editing');
+                });
+            });
+            
+            
+            // Handle time picker changes
+            const updateTimeDisplay = (timePicker) => {
+                const pill = timePicker.closest('.pill');
+                const timeInputs = timePicker.querySelectorAll('.time-input');
+                
+                const startTime = timeInputs[0].value;
+                const endTime = timeInputs[1].value;
+                
+                // Convert to 12-hour format for display
+                const formatTime = (time24) => {
+                    const [hours, minutes] = time24.split(':');
+                    const hour12 = hours % 12 || 12;
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    return `${hour12}:${minutes} ${ampm}`;
+                };
+                
+                const displayText = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+                
+                // Update only the text content, preserve the structure
+                const textNode = Array.from(pill.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                if (textNode) {
+                    textNode.textContent = displayText;
+                }
+            };
+            
+            document.querySelectorAll('.time-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const timePicker = this.closest('.time-picker');
+                    updateTimeDisplay(timePicker);
+                });
+                
+                // Also handle input events for real-time updates
+                input.addEventListener('input', function() {
+                    const timePicker = this.closest('.time-picker');
+                    updateTimeDisplay(timePicker);
+                });
+            });
+            
+            // Handle time picker presets
+            document.querySelectorAll('.time-preset-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const preset = this.dataset.preset;
+                    const timePicker = this.closest('.time-picker');
+                    const timeInputs = timePicker.querySelectorAll('.time-input');
+                    
+                    let startTime, endTime;
+                    switch(preset) {
+                        case 'morning':
+                            startTime = '09:00';
+                            endTime = '12:00';
+                            break;
+                        case 'afternoon':
+                            startTime = '12:00';
+                            endTime = '18:00';
+                            break;
+                        case 'evening':
+                            startTime = '18:00';
+                            endTime = '23:00';
+                            break;
+                        case 'all-day':
+                            startTime = '10:00';
+                            endTime = '23:45';
+                            break;
+                    }
+                    
+                    timeInputs[0].value = startTime;
+                    timeInputs[1].value = endTime;
+                    
+                    // Update display immediately
+                    updateTimeDisplay(timePicker);
+                });
+            });
+            
+            // Handle "Done" button for time picker
+            document.querySelectorAll('.close-time-picker').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dropdown = this.closest('.pill-dropdown');
+                    const pill = dropdown.parentElement;
+                    
+                    dropdown.classList.remove('visible');
+                    pill.classList.remove('editing');
+                });
+            });
+            
+            // Handle favorites toggle
+            document.querySelectorAll('.toggle-pill').forEach(pill => {
+                pill.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const isActive = this.classList.contains('active');
+                    
+                    const icon = this.querySelector('.toggle-icon');
+                    icon.className = isActive ? 'fa-solid fa-star toggle-icon' : 'fa-regular fa-star toggle-icon';
+                });
+            });
+            
+            // Demo animations
+            document.querySelectorAll('.demo-pill').forEach(pill => {
+                pill.addEventListener('click', function() {
+                    const demo = this.dataset.demo;
+                    
+                    if (demo === 'day-change') {
+                        this.innerHTML = 'Thursday <i class="fa-solid fa-chevron-down pill-edit-icon"></i>';
+                        this.classList.add('editing');
+                        setTimeout(() => this.classList.remove('editing'), 1000);
+                    } else if (demo === 'time-change') {
+                        this.innerHTML = '6:00 PM - 11:45 PM <i class="fa-solid fa-clock pill-edit-icon"></i>';
+                        this.classList.add('editing');
+                        setTimeout(() => this.classList.remove('editing'), 1000);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.demo-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    this.classList.add('editing');
+                    setTimeout(() => this.classList.remove('editing'), 500);
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.pill')) {
+                    document.querySelectorAll('.pill-dropdown.visible').forEach(dropdown => {
+                        dropdown.classList.remove('visible');
+                        dropdown.parentElement.classList.remove('editing');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

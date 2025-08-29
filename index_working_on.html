@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' ws://127.0.0.1:* wss://127.0.0.1:* https:; img-src 'self' data: https:; font-src 'self' https:;">
+    <title>Mic Finder - Collaborative Map</title>
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <!-- TODO: Replace with local Tailwind build for production - CDN should not be used in production -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Third-party Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mic Finder">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sidebar.css" type="text/css">
+    <link rel="stylesheet" href="css/map.css">
+    <link rel="stylesheet" href="css/inline-styles.css">
+    <link rel="stylesheet" href="css/mobile-styles.css">
+    
+    <!-- Application Scripts -->
+    <script src="js/config.js?v=2.0"></script>
+    <script src="js/utils.js?v=2.0"></script>
+    <script src="js/state.js?v=2.0"></script>
+    <script src="js/spreadsheetUpdater.js?v=2.0"></script>
+    <script src="js/micDataLoader.js?v=2.0"></script>
+    <script src="js/map.js?v=2.0"></script>
+    <script src="js/filters.js?v=2.0"></script>
+    <script src="js/ui.js?v=2.0"></script>
+    <script src="js/favorites.js?v=2.0"></script>
+    <script src="js/accessibility.js?v=2.0"></script>
+    <script src="js/mobile.js?v=2.0"></script>
+    <script src="js/mobile-nav.js?v=2.0"></script>
+    <script src="js/sidebar.js?v=2.0"></script>
+    <script src="js/app.js?v=2.0"></script>
+    <script src="js/inline-scripts.js"></script>
+    <script src="simple_pills.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+
+<body class="h-screen flex flex-col">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+        <!-- Enhanced Intro Overlay -->
+    <div id="intro-overlay" class="fixed inset-0 bg-black bg-opacity-95 z-[60] flex items-center justify-center p-3" style="backdrop-filter: blur(4px);">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.8)] border-2 border-gray-300" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <!-- Dynamic Header -->
+            <div class="mb-4">
+                <h2 id="dynamic-welcome-title" class="text-2xl font-black text-gray-900 mb-2 drop-shadow-sm">Ready to find your perfect stage?</h2>
+                <p id="dynamic-welcome-subtitle" class="text-sm text-gray-700 font-medium">Discover local comedy venues and open mics</p>
+            </div>
+            
+            <!-- Skip Option for Return Users -->
+            <div id="return-user-banner" class="hidden mb-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-xs">👋</span>
+                        </div>
+                        <span class="text-blue-800 font-semibold text-sm">Welcome back!</span>
+                    </div>
+                    <button id="skip-intro-btn" class="text-blue-600 hover:text-blue-800 font-medium text-xs underline">
+                        Skip intro →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Benefit-Focused Features -->
+            <div class="text-left space-y-3 mb-6">
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors duration-200 touch-manipulation">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-sm shadow-lg flex-shrink-0">🔍</div>
+                    <div>
+                        <div class="text-gray-900 font-bold text-base mb-0.5">Find your perfect stage in seconds</div>
+                        <div class="text-gray-700 font-medium text-sm">Discover venues that match your style and schedule</div>
+                </div>
+                </div>
+                <div id="filters-tutorial-trigger" class="flex items-center gap-3 p-3 rounded-lg bg-green-50 hover:bg-green-100 cursor-pointer transition-colors duration-200 touch-manipulation" role="button" tabindex="0" aria-label="Learn about smart filtering">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-black text-sm shadow-lg flex-shrink-0">⚡</div>
+                    <div>
+                        <div class="text-gray-900 font-bold text-base mb-0.5">Never miss a show that fits your schedule</div>
+                        <div class="text-gray-700 font-medium text-sm">Smart filters find exactly what you're looking for</div>
+                </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors duration-200 touch-manipulation">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-black text-sm shadow-lg flex-shrink-0">🗺️</div>
+                    <div>
+                        <div class="text-gray-900 font-bold text-base mb-0.5">Explore your comedy scene</div>
+                        <div class="text-gray-700 font-medium text-sm">Discover venues, times, and performer communities</div>
+            </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Smart CTA Button -->
+            <div class="space-y-3">
+                <button id="smart-start-btn" class="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-violet-700 hover:to-purple-700 font-bold text-base shadow-lg transition-all duration-300 transform hover:scale-105 border-2 border-violet-500 touch-manipulation">
+                    <div class="flex items-center justify-center gap-2">
+                        <span>🚀</span>
+                        <span>Start discovering venues</span>
+                    </div>
+                    <div class="text-sm font-normal opacity-90 mt-1">
+                        Interactive walkthrough included
+                    </div>
+                </button>
+                <div class="text-center">
+                    <button id="skip-walkthrough" class="text-gray-400 hover:text-gray-300 text-sm underline transition-colors duration-200">
+                        Skip walkthrough, go direct
+            </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Add this flex container near the top of <body>, before the rest of the content -->
+    <div id="search-and-filters-row"
+         class="fixed top-8 left-0 right-0 z-50 flex flex-col items-start gap-4 pointer-events-none"
+         style="width:100%; background:transparent;">
+      <!-- Search Bar Row -->
+      <div class="flex flex-col w-full pointer-events-auto">
+        <!-- Search Input -->
+        <div class="flex flex-row items-center gap-4 w-full">
+          <div id="map-search-bar" class="min-w-0 flex-grow" style="min-width: 0;">
+            <div class="flex items-center rounded-full px-3 py-1 w-full relative bg-gray-900/90 shadow-lg" style="pointer-events: auto;">
+                <input id="search-input" type="text" placeholder="Search mics and venues" class="flex-grow bg-transparent outline-none text-gray-100 text-sm px-1 placeholder-gray-400" autocomplete="off" style="min-width:0; background: transparent !important; background-color: transparent !important; border: none !important; color: #f3f4f6 !important;" />
+                <button id="search-btn" class="ml-1 text-gray-400 hover:text-indigo-400 focus:outline-none">
+                    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                </button>
+                <!-- Clear (x) button -->
+                <button id="clear-search-btn" class="ml-1 text-gray-400 hover:text-indigo-400 focus:outline-none hidden" aria-label="Clear search">
+                    <i class="fa fa-times fa-lg" aria-hidden="true"></i>
+                </button>
+                <!-- Help/Info button -->
+                <button id="show-intro-btn" class="ml-1 text-gray-400 hover:text-indigo-400 focus:outline-none" aria-label="Show intro">
+                    <i class="fa fa-question-circle fa-lg" aria-hidden="true"></i>
+                </button>
+                <!-- Autocomplete Dropdown -->
+                <div id="autocomplete-dropdown" class="autocomplete-dropdown hidden absolute top-full left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto">
+                    <!-- Suggestions will be populated here -->
+                </div>
+            </div>
+          </div>
+          <div class="w-50"></div>
+          <!-- Pills Row - Desktop Layout -->
+          <div class="flex flex-row items-center min-w-[1.5rem] h-12 ml-80 mr-40 hidden lg:flex pointer-events-auto">
+            <button id="modal-button" class="bg-gray-100 text-gray-800 border border-gray-400 shadow-md hover:bg-gray-200 hover:border-gray-500 flex-shrink-0 mr-2 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+              </svg>
+              <span id="all-filters-text">All Filters</span>
+            </button>
+            <div id="active-pills-row" class="flex flex-row gap-2 items-center min-w-[1.5rem] h-12 overflow-x-auto">
+              <!-- Only filter pills will be rendered here by JS -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pills Row - Mobile/Minimized Layout -->
+        <div class="mobile-pills-row w-full flex flex-row items-center lg:hidden pointer-events-auto px-4" style="margin-top: 2.75rem;">
+          <div id="active-pills-row-mobile"
+            class="flex flex-row items-center gap-2 overflow-x-auto">
+            <!-- All Filters button and filter pills will be rendered here by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Element -->
+    <div id="filter-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div id="modal-content" class="bg-gray-800 border border-gray-600 rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
+            <header class="p-4 flex-shrink-0 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white">All Filters</h2>
+                <button id="close-modal-x" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </header>
+            <main class="p-6 space-y-4 text-gray-200 overflow-y-auto border-y border-white/10">
+                <!-- Day of Week Filter -->
+                <div>
+                    <h3 class="flex items-center text-lg font-semibold mb-3 text-white">
+                        Day of Week
+                    </h3>
+                    <!-- Pills for desktop -->
+                    <div class="flex flex-wrap gap-2" id="dayOfWeek-filters">
+                        <button class="day-pill" data-day="Monday">Mon</button>
+                        <button class="day-pill" data-day="Tuesday">Tue</button>
+                        <button class="day-pill" data-day="Wednesday">Wed</button>
+                        <button class="day-pill" data-day="Thursday">Thu</button>
+                        <button class="day-pill" data-day="Friday">Fri</button>
+                        <button class="day-pill" data-day="Saturday">Sat</button>
+                        <button class="day-pill" data-day="Sunday">Sun</button>
+                    </div>
+                    <!-- Dropdown for mobile -->
+                    <div class="mobile-day-select-wrapper" style="display:none;">
+                        <select id="mobile-day-select" class="mobile-day-select">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                        <!-- Removed the X close button -->
+                    </div>
+                </div>
+                <!-- Time & Schedule Filter (Custom Inputs) -->
+                <div class="border-t border-white/10 pt-4">
+                    <h3 class="flex items-center text-lg font-semibold mb-3 text-white">
+                        Time & Schedule
+                    </h3>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-400">From</label>
+                            <div id="time-from-picker" class="mt-9"></div>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-400">To</label>
+                            <div id="time-to-picker" class="mt-9"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Location Filter -->
+                <div class="border-t border-white/10 pt-4">
+                    <h3 class="flex items-center text-lg font-semibold mb-3 text-white">
+                        Location
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2" id="location-filters"></div>
+                </div>
+                <!-- Details Filter -->
+                <div class="border-t border-white/10 pt-4">
+                    <h3 class="flex items-center text-lg font-semibold mb-3 text-white">
+                        Details
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2" id="details-filters"></div>
+                </div>
+                <!-- Favorites Filter -->
+                <div class="border-t border-white/10 pt-4">
+                    <h3 class="flex items-center text-lg font-semibold mb-3 text-white">
+                        Favorites
+                    </h3>
+                    <div id="favorites-filter" class="flex items-center"></div>
+                </div>
+            </main>
+            <footer class="p-4 flex-shrink-0 flex justify-between items-center gap-8">
+                <button id="clear-filters" class="font-bold text-white hover:text-gray-300 underline">Clear all</button>
+                <button id="apply-filters" class="bg-violet-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-violet-700">Show results</button>
+            </footer>
+        </div>
+    </div>
+
+    <div class="flex flex-row flex-grow overflow-hidden">
+        
+        <main class="flex-1 bg-gray-200" id="main-content">
+             <div id="map" role="application" aria-label="Interactive map showing comedy mic locations">
+                 <div class="map-controls" role="toolbar" aria-label="Map controls">
+                     <button id="directions-btn" class="map-control-btn text-blue-600 hover:text-blue-800 focus:outline-none" title="Find my location" aria-label="Find my location" style="display: block !important; visibility: visible !important;">
+                         <i class="fa fa-location-arrow fa-lg" aria-hidden="true"></i>
+                     </button>
+                     <button class="map-control-btn" id="zoom-to-fit-btn" title="Reset map view" aria-label="Reset map view"><i class="fa-solid fa-expand-arrows-alt" aria-hidden="true"></i></button>
+                 </div>
+             </div>
+        </main>
+
+        <aside id="right-sidebar" class="sidebar w-96 bg-gray-800 border-l border-gray-700 flex flex-col flex-shrink-0" role="complementary" aria-label="Mic list">
+            <div class="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
+                <button id="right-sidebar-toggle" class="p-2 text-gray-500 hover:text-indigo-600 desktop-only" aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </button>
+                <div class="sidebar-header-text flex-grow ml-4">
+                     <h2 id="results-heading" class="text-lg font-bold text-gray-100">Mics for Today <span id="mic-count" class="">(0)</span></h2>
+                     <div id="last-updated" class="text-sm text-gray-400 mt-1">Last updated: <span id="last-updated-time">--:--</span></div>
+                </div>
+                <button class="mobile-header-btn mobile-only" id="mobile-list-close" title="Close" aria-label="Close list view">
+                    <i class="fa-solid fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="sidebar-content flex-grow flex flex-col min-h-0">
+                <div class="p-4 flex flex-col gap-4 border-b border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <label for="map-filter-toggle" class="text-sm text-gray-600">Only show mics in map view</label>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="map-filter-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked aria-label="Filter mics to map view only"/>
+                            <label for="map-filter-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-2 text-lg font-bold text-gray-100 bg-gray-800" id="results-label">Map Results <span id="results-count">(0)</span></div>
+                <div id="mic-list" class="flex-grow overflow-y-auto custom-scrollbar" role="list" aria-label="List of comedy mics"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modal for Expanded Mic Details -->
+    <div id="mic-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 transition-opacity duration-300" 
+         role="dialog" 
+         aria-modal="true" 
+         aria-labelledby="modal-title" 
+         aria-describedby="modal-description">
+        <div id="mic-detail-modal-content" class="bg-white rounded-2xl shadow-xl w-full overflow-y-auto opacity-0">
+            <!-- Content is injected by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Day Selection Popup -->
+    <div id="day-selection-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Select Day</h3>
+            </div>
+            <div class="space-y-2">
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Monday">Monday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Tuesday">Tuesday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Wednesday">Wednesday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Thursday">Thursday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Friday">Friday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Saturday">Saturday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Sunday">Sunday</button>
+                <button class="day-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="">Any Day</button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="close-day-popup" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Selection Popup -->
+    <div id="time-selection-popup" class="time-selection-popup hidden">
+        <div class="time-popup-content">
+            <div class="time-popup-header">
+                <h3>
+                    <i class="fa-solid fa-microphone"></i>
+                    Select Mic Times
+                </h3>
+                <button class="time-popup-close" onclick="closeTimeSelectionPopup()">×</button>
+            </div>
+            
+            <div class="time-period-tabs">
+                <button class="time-period-tab" onclick="showTimePeriod('afternoon')" data-period="afternoon">
+                    Afternoon
+                    <span class="time-range-label">12 PM - 6 PM</span>
+                </button>
+                <button class="time-period-tab active" onclick="showTimePeriod('evening')" data-period="evening">
+                    Evening
+                    <span class="time-range-label">6 PM - 10 PM</span>
+                </button>
+                <button class="time-period-tab" onclick="showTimePeriod('night')" data-period="night">
+                    Night
+                    <span class="time-range-label">10 PM+</span>
+                </button>
+            </div>
+
+            <div class="time-options-container">
+                <div class="time-options-grid" data-period="afternoon" style="display: none;">
+                    <button class="time-option" onclick="toggleTimeSelection('2:30 PM')">
+                        <span class="time-text">2:30 PM</span>
+                        <span class="mic-count">3 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('4:00 PM')">
+                        <span class="time-text">4:00 PM</span>
+                        <span class="mic-count">8 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('5:30 PM')">
+                        <span class="time-text">5:30 PM</span>
+                        <span class="mic-count">2 mics</span>
+                    </button>
+                </div>
+
+                <div class="time-options-grid" data-period="evening">
+                    <button class="time-option" onclick="toggleTimeSelection('6:30 PM')">
+                        <span class="time-text">6:30 PM</span>
+                        <span class="mic-count">5 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('7:00 PM')">
+                        <span class="time-text">7:00 PM</span>
+                        <span class="mic-count">15 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('7:30 PM')">
+                        <span class="time-text">7:30 PM</span>
+                        <span class="mic-count">8 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('8:00 PM')">
+                        <span class="time-text">8:00 PM</span>
+                        <span class="mic-count">22 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('8:30 PM')">
+                        <span class="time-text">8:30 PM</span>
+                        <span class="mic-count">6 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('9:00 PM')">
+                        <span class="time-text">9:00 PM</span>
+                        <span class="mic-count">18 mics</span>
+                    </button>
+                </div>
+
+                <div class="time-options-grid" data-period="night" style="display: none;">
+                    <button class="time-option" onclick="toggleTimeSelection('10:00 PM')">
+                        <span class="time-text">10:00 PM</span>
+                        <span class="mic-count">7 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('11:00 PM')">
+                        <span class="time-text">11:00 PM</span>
+                        <span class="mic-count">3 mics</span>
+                    </button>
+                    <button class="time-option" onclick="toggleTimeSelection('12:00 AM')">
+                        <span class="time-text">12:00 AM</span>
+                        <span class="mic-count">2 mics</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="time-popup-actions">
+                <button class="time-popup-btn secondary" onclick="clearAllTimeSelections()">Clear All</button>
+                <button class="time-popup-btn primary" onclick="applyTimeSelection()">Apply Selection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borough Selection Popup -->
+    <div id="borough-selection-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Select Borough</h3>
+            </div>
+            <div class="space-y-2">
+                <button class="borough-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Manhattan">Manhattan</button>
+                <button class="borough-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Brooklyn">Brooklyn</button>
+                <button class="borough-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Queens">Queens</button>
+                <button class="borough-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="">Any Borough</button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="close-borough-popup" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Selection Popup -->
+    <div id="details-selection-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Select Details</h3>
+            </div>
+            <div class="space-y-2">
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Free">Free</button>
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Paid">Paid</button>
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="1 Item Min">1 Item Min</button>
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="In-person Sign-up">In-person Sign-up</button>
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="Online Sign-up">Online Sign-up</button>
+                <button class="detail-option w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors" data-value="">Any Details</button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="close-details-popup" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding/Editing Mics -->
+    <div id="add-mic-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl w-full max-w-lg max-h-full overflow-y-auto">
+            <div class="p-6 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 id="form-title" class="text-2xl font-bold text-gray-100">Add New Mic</h2>
+                    <button id="close-modal-btn" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="add-mic-form" class="space-y-4">
+                    
+                    <input type="hidden" id="mic-id">
+    
+                    <div>
+                        <label for="venue" class="block text-sm font-medium text-gray-300">Venue Name</label>
+                        <input type="text" id="venue" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+    
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-300">Address</label>
+                        <input type="text" id="address" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="lat" class="block text-sm font-medium text-gray-300">Latitude</label>
+                            <input type="number" step="any" id="lat" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="lon" class="block text-sm font-medium text-gray-300">Longitude</label>
+                            <input type="number" step="any" id="lon" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        </div>
+                    </div>
+    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="day" class="block text-sm font-medium text-gray-300">Day of Week</label>
+                            <select id="day" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option>Monday</option>
+                                <option>Tuesday</option>
+                                <option>Wednesday</option>
+                                <option>Thursday</option>
+                                <option>Friday</option>
+                                <option>Saturday</option>
+                                <option>Sunday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="time" class="block text-sm font-medium text-gray-300">Time (e.g., 7:30 PM)</label>
+                            <input type="text" id="time" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+    
+                    <div>
+                        <label for="borough" class="block text-sm font-medium text-gray-300">Borough</label>
+                        <input type="text" id="borough" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+    
+                    <div>
+                        <label for="cost" class="block text-sm font-medium text-gray-300">Cost (e.g., Free, $5)</label>
+                        <input type="text" id="cost" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+    
+                    <div>
+                        <label for="details" class="block text-sm font-medium text-gray-300">Details (e.g., 5 min, Lottery)</label>
+                        <textarea id="details" rows="3" class="mt-1 block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                    </div>
+    
+                    <div class="flex justify-end pt-4 space-x-2 border-t border-gray-700">
+                        <button type="button" id="cancel-add-mic" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Save Mic</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hover Card Element -->
+    <div id="hover-card" class="hover-card">
+        <div class="hover-card-title"></div>
+        <div class="hover-card-content"></div>
+    </div>
+
+    <!-- Bottom Bar: Only for Minimized/Mobile View -->
+    <div id="bottom-bar-mobile">
+        <div class="bottom-bar-content">
+            <!-- Left: Selected mic info -->
+            <div class="bottom-bar-left">
+                <div class="bottom-bar-info" id="bottom-bar-info" style="display: none;">
+                    <div class="title" id="bottom-selection-title"></div>
+                    <div class="subtitle" id="bottom-selection-subtitle"></div>
+                </div>
+            </div>
+            <!-- Center: All actions centered -->
+            <div class="bottom-bar-center">
+                <button class="quick-action-btn" id="find-location-btn-mobile" title="Find my location" aria-label="Find my location">
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                </button>
+                <button class="quick-action-btn" id="reset-map-btn-mobile" title="Reset map view" aria-label="Reset map view">
+                    <i class="fa-solid fa-expand-arrows-alt" aria-hidden="true"></i>
+                </button>
+                <button class="quick-action-btn" id="favorites-btn-mobile" title="Show favorites" aria-label="Show favorites">
+                    <i class="fa-regular fa-star" aria-hidden="true"></i>
+                </button>
+                <button class="quick-action-btn" id="filters-btn-mobile" title="All filters" aria-label="All filters">
+                    <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                </button>
+                <button class="quick-action-btn" id="list-view-btn-mobile" title="List view" aria-label="Switch to list view">
+                    <i class="fa-solid fa-list" aria-hidden="true"></i>
+                </button>
+            </div>
+            <!-- Right: Empty -->
+            <div class="bottom-bar-right">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

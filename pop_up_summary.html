@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fully Editable Pop-up Card</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-surface: #242526;
+            --bg-surface-2: #3a3b3c;
+            --border-color: #3e4042;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --accent-blue: #45a3ff;
+            --accent-green: #42b72a;
+            --accent-red: #ff5252;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: grid;
+            place-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* --- Main Container --- */
+        .popup-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .popup-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            position: relative; background-color: var(--bg-surface);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 1.5rem 2rem; width: 90%; max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* --- Header & Main Actions --- */
+        .popup-header {
+            display: flex; justify-content: space-between;
+            align-items: flex-start; margin-bottom: 0.5rem;
+        }
+        .title { font-size: 1.75rem; font-weight: 700; margin: 0; }
+        .subtitle { font-size: 1rem; color: var(--text-secondary); font-weight: 500; }
+        
+        .header-actions .action-btn {
+            background-color: var(--bg-surface-2); border: 1px solid var(--border-color);
+            color: var(--text-primary); padding: 0.5rem 1rem;
+            border-radius: 6px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-actions .action-btn#edit-btn {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .header-actions .action-btn#edit-btn.save-mode {
+             background-color: var(--accent-green);
+             border-color: var(--accent-green);
+        }
+
+        /* --- Stats Bar --- */
+        .stats-bar {
+            display: flex; flex-wrap: wrap; align-items: center;
+            gap: 0.5rem 1.5rem; padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+        .stat {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.9rem; color: var(--text-secondary);
+        }
+        .stat i { color: var(--accent-blue); width: 1.2em; text-align: center; }
+        .stat .stat-toggle { cursor: pointer; }
+        .stat .stat-toggle.off { color: var(--text-secondary); }
+        .stat .stat-toggle.on { color: var(--accent-green); }
+
+
+        /* --- Jokelist --- */
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 1.5rem 0 0.5rem 0;
+        }
+        .section-title {
+            font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .jokelist { list-style: none; padding: 0; margin: 0; }
+        .jokelist-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0; border-bottom: 1px solid var(--bg-surface-2);
+            font-size: 0.95rem;
+        }
+        .jokelist-item:last-child { border: none; }
+        
+        /* --- Notes Section --- */
+        .notes {
+            background-color: var(--bg-surface-2); border-radius: 8px;
+            padding: 1rem; font-size: 0.9rem; line-height: 1.6;
+            margin-top: 0.5rem; color: var(--text-secondary);
+        }
+
+        /* --- EDIT MODE STYLES --- */
+        .edit-mode [contenteditable="true"] {
+            outline: 2px solid var(--accent-blue);
+            border-radius: 4px;
+            padding: 0.1rem 0.3rem;
+            background-color: #444;
+        }
+        
+        .edit-mode .stat-value-input {
+            width: 50px; background: var(--bg-surface-2); color: var(--text-primary);
+            border: 1px solid var(--border-color); border-radius: 4px; text-align: center;
+        }
+
+        .edit-mode .joke-actions { display: block; }
+        .joke-actions { display: none; margin-left: 10px; }
+        .joke-actions button {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-secondary); font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .joke-actions .delete-joke-btn:hover { color: var(--accent-red); }
+
+        .add-joke-btn {
+            display: none; /* Hidden by default */
+            width: 100%; padding: 0.5rem; margin-top: 0.5rem;
+            background-color: var(--bg-surface-2); border: 1px dashed var(--border-color);
+            color: var(--text-secondary); border-radius: 6px; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .edit-mode .add-joke-btn { display: block; }
+        .add-joke-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-overlay"></div>
+        <div class="popup-content" id="popup-content">
+            
+            <div class="popup-header">
+                <div class="title-section">
+                    <div class="title" id="popup-title"></div>
+                    <div class="subtitle" id="popup-subtitle"></div>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" id="edit-btn">
+                        <i class="fa-solid fa-pencil"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-bar" id="stats-bar">
+                </div>
+
+            <div class="section-header">
+                <div class="section-title">Setlist</div>
+            </div>
+            <ul class="jokelist" id="jokelist">
+                </ul>
+            <button class="add-joke-btn" id="add-joke-btn"><i class="fa-solid fa-plus"></i> Add Joke</button>
+
+
+            <div class="section-header">
+                <div class="section-title">Notes</div>
+            </div>
+            <div class="notes" id="notes-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA MODEL ---
+        let setData = {
+            title: "Late Show",
+            subtitle: "The Comedy Cellar",
+            duration: "7m 30s",
+            laughScore: 91,
+            isPaid: true,
+            isRecorded: true,
+            setlist: [
+                { title: "Scarecrow Joke" },
+                { title: "Coffee Rant (Absolute Darkness)" },
+                { title: "Librarian's Favorite Line" }
+            ],
+            notes: "Crowd was hot. New coffee tag landed well. The transition from scarecrow to coffee still needs work."
+        };
+
+        // --- 2. RENDER/POPULATE VIEW FROM DATA ---
+        function populateCard(data) {
+            // Header
+            document.getElementById('popup-title').textContent = data.title;
+            document.getElementById('popup-subtitle').textContent = data.subtitle;
+
+            // Stats Bar
+            const statsBar = document.getElementById('stats-bar');
+            statsBar.innerHTML = `
+                <div class="stat"><i class="fa-solid fa-clock"></i> <span id="stat-duration">${data.duration}</span></div>
+                <div class="stat"><i class="fa-solid fa-face-laugh"></i> <span id="stat-score">${data.laughScore}%</span></div>
+                <div class="stat" id="stat-paid"><i class="fa-solid fa-dollar-sign"></i> <span>${data.isPaid ? 'Paid' : 'Unpaid'}</span></div>
+                <div class="stat" id="stat-recorded"><i class="fa-solid fa-video"></i> <span>${data.isRecorded ? 'Recorded' : 'Not Recorded'}</span></div>
+            `;
+
+            // Notes
+            document.getElementById('notes-content').textContent = data.notes;
+            
+            // Setlist
+            const jokelistElement = document.getElementById('jokelist');
+            jokelistElement.innerHTML = ''; // Clear existing list
+            data.setlist.forEach((joke, index) => {
+                const li = document.createElement('li');
+                li.className = 'jokelist-item';
+                li.innerHTML = `
+                    <div class="joke-title" data-index="${index}">${joke.title}</div>
+                    <div class="joke-actions">
+                        <button class="delete-joke-btn" data-index="${index}" title="Delete Joke"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+                jokelistElement.appendChild(li);
+            });
+        }
+
+        // --- 3. EDIT MODE LOGIC ---
+        function toggleEditMode(isEditing) {
+            const content = document.getElementById('popup-content');
+            content.classList.toggle('edit-mode', isEditing);
+
+            // Toggle contentEditable attributes
+            document.getElementById('popup-title').setAttribute('contenteditable', isEditing);
+            document.getElementById('popup-subtitle').setAttribute('contenteditable', isEditing);
+            document.getElementById('notes-content').setAttribute('contenteditable', isEditing);
+            document.querySelectorAll('.joke-title').forEach(el => el.setAttribute('contenteditable', isEditing));
+
+            // Stats Bar Edit Mode
+            const statsBar = document.getElementById('stats-bar');
+            if (isEditing) {
+                statsBar.innerHTML = `
+                    <div class="stat"><i class="fa-solid fa-clock"></i> <span id="stat-duration" contenteditable="true">${setData.duration}</span></div>
+                    <div class="stat"><i class="fa-solid fa-face-laugh"></i> <input type="number" class="stat-value-input" id="stat-score-input" value="${setData.laughScore}" min="0" max="100"/>%</div>
+                    <div class="stat"><i class="fa-solid fa-dollar-sign"></i> <button class="stat-toggle ${setData.isPaid ? 'on' : 'off'}" id="stat-paid-toggle">${setData.isPaid ? 'Paid' : 'Unpaid'}</button></div>
+                    <div class="stat"><i class="fa-solid fa-video"></i> <button class="stat-toggle ${setData.isRecorded ? 'on' : 'off'}" id="stat-recorded-toggle">${setData.isRecorded ? 'Recorded' : 'Not Recorded'}</button></div>
+                `;
+                // Add event listeners for new stat toggles
+                 document.getElementById('stat-paid-toggle').addEventListener('click', (e) => {
+                    const isPaid = e.target.classList.toggle('on');
+                    e.target.classList.toggle('off', !isPaid);
+                    e.target.textContent = isPaid ? 'Paid' : 'Unpaid';
+                });
+                document.getElementById('stat-recorded-toggle').addEventListener('click', (e) => {
+                    const isRecorded = e.target.classList.toggle('on');
+                    e.target.classList.toggle('off', !isRecorded);
+                    e.target.textContent = isRecorded ? 'Recorded' : 'Not Recorded';
+                });
+
+            } else {
+                populateCard(setData); // Re-render the non-editable view
+            }
+        }
+
+        // --- 4. SAVE CHANGES LOGIC ---
+        function saveChanges() {
+            // Update data object from the DOM
+            setData.title = document.getElementById('popup-title').textContent;
+            setData.subtitle = document.getElementById('popup-subtitle').textContent;
+            setData.notes = document.getElementById('notes-content').textContent;
+            setData.duration = document.getElementById('stat-duration').textContent;
+            setData.laughScore = parseInt(document.getElementById('stat-score-input').value, 10);
+            setData.isPaid = document.getElementById('stat-paid-toggle').classList.contains('on');
+            setData.isRecorded = document.getElementById('stat-recorded-toggle').classList.contains('on');
+            
+            const newSetlist = [];
+            document.querySelectorAll('.joke-title').forEach(el => {
+                newSetlist.push({ title: el.textContent });
+            });
+            setData.setlist = newSetlist;
+
+            // Log the updated data to the console for verification
+            console.log("Saved Data:", setData);
+        }
+
+        // --- 5. INITIALIZE AND ADD EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const editBtn = document.getElementById('edit-btn');
+            const addJokeBtn = document.getElementById('add-joke-btn');
+            const jokelist = document.getElementById('jokelist');
+            let isEditing = false;
+            
+            populateCard(setData); // Initial render
+
+            editBtn.addEventListener('click', () => {
+                isEditing = !isEditing;
+                editBtn.innerHTML = isEditing ? '<i class="fa-solid fa-save"></i> Save' : '<i class="fa-solid fa-pencil"></i> Edit';
+                editBtn.classList.toggle('save-mode', isEditing);
+
+                if (!isEditing) {
+                    saveChanges();
+                }
+                toggleEditMode(isEditing);
+            });
+
+            addJokeBtn.addEventListener('click', () => {
+                 const newJoke = { title: "New Joke" };
+                 setData.setlist.push(newJoke); // Update data model first
+                 // Re-render editable list
+                 toggleEditMode(true);
+            });
+
+            jokelist.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-joke-btn')) {
+                    const index = parseInt(e.target.closest('.delete-joke-btn').dataset.index, 10);
+                    setData.setlist.splice(index, 1); // Remove from data model
+                    // Re-render editable list
+                    toggleEditMode(true);
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

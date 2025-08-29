@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Calendar with Search and Expandable View</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Papa Parse for CSV loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-surface: #232533;
+            --bg-surface-2: #3a3b3c;
+            --bg-input: #2a2d3e;
+            --border-color: #3e4042;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            
+            --accent-blue: #45a3ff;
+            --accent-green: #32b977;
+            --accent-orange: #f5c518;
+            --accent-red: #ef4444;
+            --purple: #9d6cff;
+            --font-sans: 'Inter', sans-serif;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* --- App Header --- */
+        .app-header {
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .app-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .nav-toggle {
+            display: flex;
+            background: var(--bg-main);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .nav-toggle-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-toggle-btn.active {
+            background-color: var(--accent-blue);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .nav-toggle-btn:hover:not(.active) {
+            background-color: var(--bg-surface-2);
+            color: var(--text-primary);
+        }
+        
+        /* --- Main Calendar Container --- */
+        .set-history-calendar {
+            background-color: var(--bg-surface);
+            border: none;
+            border-radius: 0;
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: none;
+            width: 100%;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .calendar-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 2rem 0;
+            text-align: center;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding: 0 0.5rem;
+        }
+
+        .date-range { font-size: 1.1rem; font-weight: 600; }
+        .nav-controls { display: flex; align-items: center; gap: 0.5rem; }
+        .nav-btn, .today-btn, .add-set-btn {
+            background: linear-gradient(90deg, #444857 0%, var(--bg-surface-2) 100%);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(.4,0,.2,1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-btn { 
+            width: 40px; 
+            font-size: 0.9rem;
+            min-width: 40px;
+        }
+        
+        .nav-btn:hover, .today-btn:hover { 
+            background: linear-gradient(90deg, var(--accent-blue) 0%, #4f46e5 100%);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+        }
+        
+        .today-btn { 
+            font-size: 0.875rem; 
+            font-weight: 500; 
+            padding: 0 1rem;
+            min-width: auto;
+        }
+        
+        .add-set-btn {
+            font-size: 0.875rem; 
+            font-weight: 500; 
+            padding: 0 1rem;
+            background: linear-gradient(90deg, var(--accent-blue) 0%, #4f46e5 100%);
+            border-color: var(--accent-blue);
+            color: #ffffff;
+            min-width: auto;
+        }
+        
+        .add-set-btn:hover { 
+            background: linear-gradient(90deg, #4f46e5 0%, #3730a3 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .add-set-btn i { margin-right: 0.5rem; }
+        
+        .add-set-btn[style*="background-color: var(--accent-green)"] {
+            background: linear-gradient(90deg, var(--accent-green) 0%, #059669 100%) !important;
+        }
+        
+        .add-set-btn[style*="background-color: var(--accent-green)"]:hover {
+            background: linear-gradient(90deg, #059669 0%, #047857 100%) !important;
+        }
+
+        /* --- Filter Controls --- */
+        .filter-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+        
+        .advanced-search {
+            grid-column: 1 / -1;
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-surface-2);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .advanced-search.active {
+            display: block;
+        }
+        
+        .search-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .search-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-group { 
+            position: relative;
+        }
+        
+        .filter-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            z-index: 1;
+        }
+        
+        .filter-input {
+            background: var(--bg-main);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            width: 100%;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(69, 163, 255, 0.2);
+            background: var(--bg-input);
+        }
+        
+        .filter-input:hover {
+            border-color: var(--accent-blue);
+        }
+
+        /* --- Calendar Grid --- */
+        .calendar-grid-container { 
+            overflow-y: auto; 
+            flex-grow: 1;
+            padding: 0 0.5rem;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 1rem;
+            align-items: start;
+        }
+        
+        .day-cell { 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 140px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .day-cell:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-blue);
+        }
+        
+        .day-name { 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .day-number {
+            font-size: 1rem; 
+            font-weight: 600; 
+            margin-bottom: 0.75rem;
+            width: 32px; 
+            height: 32px; 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center; 
+            margin-left: auto; 
+            margin-right: auto;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .day-cell.is-today .day-number {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%);
+            color: #ffffff; 
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .events-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.75rem;
+            flex: 1;
+            align-items: stretch;
+        }
+        
+        .event-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: #ffffff; 
+            padding: 0.75rem; 
+            border-radius: 8px;
+            font-size: 0.8rem; 
+            font-weight: 500; 
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(.4,0,.2,1); 
+            position: relative; 
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 60px;
+            gap: 0.25rem;
+        }
+        
+        .event-pill:hover { 
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            z-index: 2;
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .event-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+        
+        .event-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            font-size: 0.7rem;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+        
+        .event-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .event-detail i {
+            width: 12px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        .event-blue { 
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%);
+        }
+        
+        .event-green { 
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+        }
+        
+        .event-orange { 
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #d97706 100%);
+        }
+        
+        .event-red { 
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+        }
+
+        /* --- Expanded Calendar View --- */
+        .set-history-calendar.is-expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-width: none;
+            width: auto;
+            height: 100vh;
+            z-index: 500;
+            padding: 2rem;
+            background: var(--bg-main);
+        }
+        
+        .is-expanded .calendar-grid {
+            grid-template-rows: repeat(5, 1fr);
+            height: 100%;
+        }
+        
+        .is-expanded .day-cell { 
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px; 
+            padding: 1rem;
+            min-height: 120px;
+        }
+
+        /* --- Popups, Modals, Menus (existing styles adapted slightly) --- */
+        .popup-container, .modal-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            visibility: hidden; opacity: 0; transition: visibility 0s 0.2s, opacity 0.2s ease;
+        }
+        .popup-container.is-visible, .modal-container.is-visible { visibility: visible; opacity: 1; transition-delay: 0s; }
+        .popup-overlay, .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+        }
+        .popup-content, .modal-content {
+            position: relative; background-color: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1.5rem 2rem; width: 90%; z-index: 1001;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: scale(0.95); opacity: 0;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .popup-container.is-visible .popup-content, .modal-container.is-visible .modal-content { transform: scale(1); opacity: 1; }
+        .popup-close-btn, .modal-close-btn {
+            position: absolute; top: 0.75rem; right: 1rem; background: none; border: none;
+            font-size: 2rem; color: var(--text-secondary); cursor: pointer; line-height: 1;
+        }
+        .context-menu {
+            position: absolute; z-index: 2000; background-color: var(--bg-surface-2);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); padding: 0.5rem 0; min-width: 220px;
+        }
+        .context-menu-list { list-style: none; padding: 0; margin: 0; }
+        .context-menu-item {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem;
+            font-size: 0.9rem; cursor: pointer; color: var(--text-primary);
+        }
+        .context-menu-item:hover { background-color: var(--accent-blue); color: #ffffff; }
+        .context-menu-item.delete:hover { background-color: var(--accent-red); }
+        .context-menu-item i { width: 1.2em; text-align: center; opacity: 0.8; }
+        .form-modal .modal-content { max-width: 600px; }
+        .form-title { margin-top: 0; margin-bottom: 2rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            background-color: var(--bg-input); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 0.75rem; color: var(--text-primary);
+            font-size: 0.95rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(69, 163, 255, 0.2);
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-actions {
+            grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 1rem;
+            margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);
+        }
+        .form-btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+        .btn-secondary { background-color: var(--bg-surface-2); color: var(--text-secondary); border-color: var(--border-color); }
+        .btn-secondary:hover { background-color: #444546; }
+        .btn-primary { background-color: var(--accent-blue); color: #ffffff; }
+        .btn-primary:hover { filter: brightness(1.15); }
+        
+        /* NEW: Confirmation Modal */
+        .confirm-modal .modal-content { max-width: 450px; text-align: center; }
+        .confirm-modal h3 { margin-top: 0; }
+        .confirm-modal p { color: var(--text-secondary); margin-bottom: 2rem; }
+        .confirm-actions { display: flex; justify-content: center; gap: 1rem; }
+        .btn-danger { background-color: var(--accent-red); color: #ffffff; }
+        .btn-danger:hover { filter: brightness(1.15); }
+
+        /* Mic Selection Styles */
+        .mic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .mic-item:hover {
+            background-color: var(--bg-surface-2);
+        }
+        .mic-item:last-child {
+            border-bottom: none;
+        }
+        .mic-info {
+            flex-grow: 1;
+        }
+        .mic-venue {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .mic-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .mic-select-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .mic-select-btn:hover {
+            filter: brightness(1.15);
+        }
+
+        /* Event Summary Modal */
+        .summary-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 1rem; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .summary-title-input { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin: 0; 
+            color: var(--text-primary);
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            width: 100%;
+        }
+        .summary-title-input:focus {
+            outline: none;
+            background-color: var(--bg-input);
+            border-color: var(--accent-blue);
+        }
+        .summary-type-select { 
+            padding: 0.25rem 0.75rem; 
+            border-radius: 12px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            background-color: var(--accent-blue);
+        }
+        .summary-details { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 1rem; 
+            margin-bottom: 1.5rem; 
+        }
+        .summary-field { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .summary-field-label { 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            margin-bottom: 0.5rem; 
+        }
+        .summary-field-input { 
+            color: var(--text-primary); 
+            font-weight: 500;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-family: inherit;
+        }
+        .summary-field-input:focus {
+            outline: none;
+            background-color: var(--bg-input);
+            border-color: var(--accent-blue);
+        }
+        .summary-setlist, .summary-notes { 
+            margin-bottom: 1.5rem; 
+        }
+        .summary-textarea { 
+            background-color: var(--bg-input); 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            padding: 0.75rem; 
+            white-space: pre-wrap; 
+            font-family: 'Courier New', monospace; 
+            color: var(--text-primary); 
+            min-height: 3rem;
+            width: 100%;
+            resize: vertical;
+        }
+        .summary-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(69, 163, 255, 0.2);
+        }
+        .summary-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        }
+        
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-width: 60px;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        
+        .bottom-nav-item.active {
+            color: var(--accent-blue);
+            background: rgba(69, 163, 255, 0.1);
+        }
+        
+        .bottom-nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .bottom-nav-item i {
+            font-size: 1.2rem;
+        }
+        
+        .bottom-nav-item span {
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Calendar Views Toggle */
+        .view-toggle {
+            display: flex;
+            background: var(--bg-main);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+        
+        .view-toggle-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .view-toggle-btn.active {
+            background-color: var(--accent-blue);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .view-toggle-btn:hover:not(.active) {
+            background-color: var(--bg-surface-2);
+            color: var(--text-primary);
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .header-left {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .nav-toggle {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: flex;
+            }
+            
+            body {
+                padding-bottom: calc(80px + env(safe-area-inset-bottom));
+            }
+            
+            .set-history-calendar {
+                padding: 1rem;
+                padding-bottom: 2rem;
+            }
+            
+            .calendar-nav {
+                flex-wrap: wrap;
+                gap: 1rem;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+            
+            .nav-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .filter-controls {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .calendar-grid {
+                gap: 0.5rem;
+            }
+            
+            .day-cell {
+                min-height: 100px;
+                padding: 0.5rem;
+            }
+            
+            .nav-btn, .today-btn, .add-set-btn {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .event-pill {
+                min-height: 40px;
+                padding: 0.5rem;
+                touch-action: manipulation;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .calendar-grid {
+                font-size: 0.875rem;
+            }
+            
+            .day-cell {
+                min-height: 70px;
+                padding: 0.25rem;
+            }
+            
+            .day-number {
+                width: 24px;
+                height: 24px;
+                font-size: 0.875rem;
+            }
+            
+            .event-pill {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <!-- App Header -->
+    <div class="app-header">
+        <div class="header-left">
+            <div class="app-logo">
+                <i class="fas fa-calendar-alt"></i>
+                Mic Calendar
+            </div>
+            <div class="nav-toggle">
+                <button class="nav-toggle-btn" id="mapNavBtn">
+                    <i class="fas fa-map"></i>
+                    Map
+                </button>
+                <button class="nav-toggle-btn active" id="calendarNavBtn">
+                    <i class="fas fa-calendar"></i>
+                    Calendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Calendar Container -->
+    <div class="set-history-calendar" id="calendarContainer">
+        <h3 class="calendar-title">Set History</h3>
+        
+        <!-- Calendar View Toggle -->
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" id="weekViewBtn">
+                <i class="fas fa-calendar-week"></i>
+                <span>Week</span>
+            </button>
+            <button class="view-toggle-btn" id="monthViewBtn">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Month</span>
+            </button>
+            <button class="view-toggle-btn" id="listViewBtn">
+                <i class="fas fa-list"></i>
+                <span>List</span>
+            </button>
+        </div>
+        
+        <div class="calendar-nav">
+            <span class="date-range" id="dateRange"></span>
+            <div class="nav-controls">
+                <!-- NEW: Expand Button -->
+                <button class="nav-btn" id="expandBtn" aria-label="Expand or collapse calendar">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="nav-btn" id="prevWeekBtn" aria-label="Previous week"><i class="fas fa-chevron-left"></i></button>
+                <button class="nav-btn" id="nextWeekBtn" aria-label="Next week"><i class="fas fa-chevron-right"></i></button>
+                <button class="today-btn" id="todayBtn">Today</button>
+                <button class="add-set-btn" id="addSetBtn">
+                    <i class="fas fa-plus fa-xs"></i> Add Set
+                </button>
+                <button class="add-set-btn" id="addMicBtn" style="background-color: var(--accent-green);">
+                    <i class="fas fa-microphone fa-xs"></i> Add Mic
+                </button>
+                <!-- NEW: Calendar Icon in top right -->
+                <button class="nav-btn" id="calendarIconBtn" aria-label="Calendar view">
+                    <i class="fas fa-calendar"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+            <div class="filter-group">
+                <i class="fas fa-search"></i>
+                <input type="search" id="venueSearch" class="filter-input" placeholder="Search venue, notes, or setlist...">
+            </div>
+            <div class="filter-group" style="display: flex; gap: 0.5rem;">
+                <select id="typeFilter" class="filter-input" style="padding-left: 1rem;">
+                    <option value="all">All Types</option>
+                    <option value="blue">Showcase</option>
+                    <option value="green">Open Mic</option>
+                    <option value="orange">Corporate / Private</option>
+                    <option value="red">Late Night</option>
+                </select>
+                <button id="advancedSearchToggle" class="nav-btn" title="Advanced Search" style="flex-shrink: 0;">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
+            </div>
+            
+            <!-- Advanced Search Panel -->
+            <div class="advanced-search" id="advancedSearch">
+                <div class="search-row">
+                    <div class="filter-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Date Range</label>
+                        <input type="date" id="dateFrom" class="filter-input" style="padding-left: 1rem;">
+                    </div>
+                    <div class="filter-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">To</label>
+                        <input type="date" id="dateTo" class="filter-input" style="padding-left: 1rem;">
+                    </div>
+                    <div class="filter-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Min Jokes</label>
+                        <input type="number" id="minJokes" class="filter-input" min="0" placeholder="0" style="padding-left: 1rem;">
+                    </div>
+                </div>
+                <div class="search-row">
+                    <button id="clearFilters" class="nav-btn" style="width: auto; padding: 0 1rem;">
+                        <i class="fas fa-times"></i> Clear All
+                    </button>
+                    <div style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 1rem;">
+                        <span>Shortcuts: <kbd style="background: var(--bg-surface-2); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">Ctrl+F</kbd> Search, <kbd style="background: var(--bg-surface-2); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">Ctrl+T</kbd> Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-grid-container">
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar content will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Right-Click Context Menu -->
+    <div id="event-context-menu" class="context-menu" style="display: none;">
+        <ul class="context-menu-list">
+            <li class="context-menu-item" data-action="edit"><i class="fa-solid fa-fw fa-pencil"></i><span>Edit Set</span></li>
+            <li class="context-menu-item delete" data-action="delete"><i class="fa-solid fa-fw fa-trash-can"></i><span>Delete Set</span></li>
+        </ul>
+    </div>
+
+    <!-- MIC SELECTION MODAL -->
+    <div id="mic-selection-modal" class="modal-container">
+        <div class="modal-overlay"></div>
+        <div class="modal-content" style="max-width: 700px;">
+            <button class="modal-close-btn" aria-label="Close">&times;</button>
+            <h3 class="form-title">Select a Mic to Add</h3>
+            
+            <div class="filter-controls" style="margin-bottom: 1.5rem;">
+                <div class="filter-group">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="micSearch" class="filter-input" placeholder="Search venues...">
+                </div>
+                <div class="filter-group">
+                    <i class="fas fa-calendar-day"></i>
+                    <select id="dayFilter" class="filter-input" style="padding-left: 2.25rem;">
+                        <option value="all">All Days</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="micsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                <!-- Mic options will be populated here -->
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="form-btn btn-secondary modal-cancel-btn">Cancel</button>
+                <a href="index.html" class="form-btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+                    <i class="fas fa-external-link-alt" style="margin-right: 0.5rem;"></i>
+                    Open Mic Finder
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- "ADD/EDIT SET" MODAL -->
+    <div id="add-edit-modal" class="modal-container form-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Close">&times;</button>
+            <h3 class="form-title" id="formTitle">Log a New Set</h3>
+            <form id="setForm">
+                 <div class="form-grid">
+                    <input type="hidden" id="setId" name="setId">
+                    <div class="form-group"><label for="event-title">Event Title</label><input type="text" id="event-title" name="event-title" required placeholder="e.g., Showcase"></div>
+                    <div class="form-group"><label for="venue">Venue</label><input type="text" id="venue" name="venue" required placeholder="e.g., The Comedy Cellar"></div>
+                    <div class="form-group"><label for="date">Date</label><input type="date" id="date" name="date" required></div>
+                    <div class="form-group"><label for="event-type">Event Type</label><select id="event-type" name="eventType" required><option value="blue">Showcase</option><option value="green">Open Mic</option><option value="orange">Corporate / Private</option><option value="red">Late Night</option></select></div>
+                    <div class="form-group full-width"><label for="setlist">Setlist (one joke per line)</label><textarea id="setlist" name="setlist" placeholder="Scarecrow Joke&#10;Coffee Rant"></textarea></div>
+                    <div class="form-group full-width"><label for="notes">Performance Notes</label><textarea id="notes" name="notes" placeholder="Crowd was... New tag landed..."></textarea></div>
+                    <div class="form-actions">
+                         <button type="button" class="form-btn btn-secondary modal-cancel-btn">Cancel</button>
+                         <button type="submit" class="form-btn btn-primary">Save Set</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NEW: Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal-container confirm-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this set? This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button class="form-btn btn-secondary modal-cancel-btn">Cancel</button>
+                <button id="confirmDeleteBtn" class="form-btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Summary Modal -->
+    <div id="event-summary-modal" class="modal-container">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Close">&times;</button>
+            <div id="summaryContent">
+                <!-- Summary content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav" id="bottomNav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="fas fa-map"></i>
+            <span>Map</span>
+        </a>
+        <div class="bottom-nav-item active">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Calendar</span>
+        </div>
+        <div class="bottom-nav-item" id="statsNavBtn">
+            <i class="fas fa-chart-bar"></i>
+            <span>Stats</span>
+        </div>
+        <div class="bottom-nav-item" id="settingsNavBtn">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- DATA STORE ---
+        // In a real app, this would come from a database.
+        let setsData = [
+            { id: 1, date: '2025-06-15', title: 'Open Mic', venue: 'The Laugh Factory', eventType: 'green', setlist: 'Airplane food joke', notes: 'Good crowd.' },
+            { id: 2, date: '2025-06-15', title: 'Showcase', venue: 'The Comedy Store', eventType: 'blue', setlist: 'Cat joke\nDog joke', notes: '' },
+            { id: 3, date: '2025-06-16', title: 'Corporate Gig', venue: 'Microsoft HQ', eventType: 'orange', setlist: 'Clean material only', notes: 'Paid well.' },
+            { id: 4, date: '2025-06-18', title: 'Late Show', venue: 'The Comedy Cellar', eventType: 'red', setlist: 'New 5 minutes', notes: 'Felt a bit rusty.' },
+            { id: 5, date: '2025-06-20', title: 'Weekend Special', venue: 'The Comedy Store', eventType: 'blue', setlist: 'Best 10 minutes', notes: 'Killed it.' },
+             { id: 6, date: '2025-07-04', title: 'July 4th Bash', venue: 'Town Hall', eventType: 'orange', setlist: 'Patriotic humor', notes: 'Fireworks were loud.' },
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentWeek = new Date(); // Start with the current date
+        let isExpandedView = false;
+        let set_to_delete = null;
+
+        // --- DOM ELEMENT REFERENCES ---
+        const calendarContainer = document.getElementById('calendarContainer');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const dateRangeEl = document.getElementById('dateRange');
+        const venueSearch = document.getElementById('venueSearch');
+        const typeFilter = document.getElementById('typeFilter');
+        const contextMenu = document.getElementById('event-context-menu');
+        
+        // Modals
+        const addEditModal = document.getElementById('add-edit-modal');
+        const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+        const eventSummaryModal = document.getElementById('event-summary-modal');
+        const micSelectionModal = document.getElementById('mic-selection-modal');
+        const setForm = document.getElementById('setForm');
+        const formTitle = document.getElementById('formTitle');
+        const setIdInput = document.getElementById('setId');
+        
+        // Mic selection elements
+        const micSearch = document.getElementById('micSearch');
+        const dayFilter = document.getElementById('dayFilter');
+        const micsList = document.getElementById('micsList');
+
+        // --- RENDER FUNCTION ---
+        function renderCalendar() {
+            calendarGrid.innerHTML = ''; // Clear the grid
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            let viewDate = new Date(currentWeek);
+            
+            // Determine start and end of the week/month
+            let startDate, endDate;
+            if(isExpandedView) {
+                startDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+                endDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0);
+                dateRangeEl.textContent = viewDate.toLocaleDateString('en-us', { month: 'long', year: 'numeric' });
+                calendarGrid.style.gridTemplateRows = `repeat(${Math.ceil((endDate.getDate() + startDate.getDay()) / 7)}, 1fr)`;
+            } else {
+                let dayOfWeek = viewDate.getDay();
+                startDate = new Date(viewDate);
+                startDate.setDate(viewDate.getDate() - dayOfWeek);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                dateRangeEl.textContent = `${startDate.toLocaleDateString('en-us', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-us', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            }
+
+            // Enhanced filtering
+            const venueQuery = venueSearch.value.toLowerCase();
+            const typeQuery = typeFilter.value;
+            const dateFrom = document.getElementById('dateFrom')?.value;
+            const dateTo = document.getElementById('dateTo')?.value;
+            const minJokes = parseInt(document.getElementById('minJokes')?.value) || 0;
+
+            const filteredSets = setsData.filter(set => {
+                // Enhanced search - venue, notes, setlist
+                const searchMatch = venueQuery === '' || 
+                    set.venue.toLowerCase().includes(venueQuery) ||
+                    (set.notes && set.notes.toLowerCase().includes(venueQuery)) ||
+                    (set.setlist && set.setlist.toLowerCase().includes(venueQuery));
+                
+                const typeMatch = typeQuery === 'all' || set.eventType === typeQuery;
+                
+                // Date range filtering
+                const setDate = new Date(set.date);
+                const fromMatch = !dateFrom || setDate >= new Date(dateFrom);
+                const toMatch = !dateTo || setDate <= new Date(dateTo);
+                
+                // Minimum jokes filtering
+                const jokeCount = set.setlist ? set.setlist.split('\\n').filter(line => line.trim()).length : 0;
+                const jokesMatch = jokeCount >= minJokes;
+                
+                return searchMatch && typeMatch && fromMatch && toMatch && jokesMatch;
+            });
+
+            // Create day cells
+            let dayCells = {};
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateString = d.toISOString().split('T')[0];
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
+                dayCell.dataset.date = dateString;
+
+                if (d.getTime() === today.getTime()) {
+                    dayCell.classList.add('is-today');
+                }
+
+                dayCell.innerHTML = `
+                    <div class="day-name">${d.toLocaleDateString('en-us', { weekday: 'short' })}</div>
+                    <div class="day-number">${d.getDate()}</div>
+                    <div class="events-container"></div>
+                `;
+                calendarGrid.appendChild(dayCell);
+                dayCells[dateString] = dayCell;
+            }
+            
+            // If month view, add empty cells for padding
+            if(isExpandedView) {
+                for(let i=0; i<startDate.getDay(); i++) {
+                    calendarGrid.prepend(document.createElement('div'));
+                }
+            }
+            
+            // Populate events with enhanced information
+            filteredSets.forEach(set => {
+                if (dayCells[set.date]) {
+                    const eventsContainer = dayCells[set.date].querySelector('.events-container');
+                    const eventPill = document.createElement('div');
+                    eventPill.className = `event-pill event-${set.eventType}`;
+                    eventPill.dataset.setId = set.id;
+                    
+                    // Create enhanced event content
+                    const eventTitle = document.createElement('div');
+                    eventTitle.className = 'event-title';
+                    eventTitle.textContent = set.title;
+                    
+                    const eventDetails = document.createElement('div');
+                    eventDetails.className = 'event-details';
+                    
+                    // Venue detail
+                    if (set.venue) {
+                        const venueDetail = document.createElement('div');
+                        venueDetail.className = 'event-detail';
+                        venueDetail.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${set.venue}</span>`;
+                        eventDetails.appendChild(venueDetail);
+                    }
+                    
+                    // Setlist count detail (if setlist exists)
+                    if (set.setlist && set.setlist.trim()) {
+                        const jokeCount = set.setlist.split('\n').filter(line => line.trim()).length;
+                        const setlistDetail = document.createElement('div');
+                        setlistDetail.className = 'event-detail';
+                        setlistDetail.innerHTML = `<i class="fas fa-list"></i><span>${jokeCount} jokes</span>`;
+                        eventDetails.appendChild(setlistDetail);
+                    }
+                    
+                    // Notes preview (if notes exist)
+                    if (set.notes && set.notes.trim()) {
+                        const notesPreview = set.notes.length > 20 ? set.notes.substring(0, 20) + '...' : set.notes;
+                        const notesDetail = document.createElement('div');
+                        notesDetail.className = 'event-detail';
+                        notesDetail.innerHTML = `<i class="fas fa-sticky-note"></i><span>${notesPreview}</span>`;
+                        eventDetails.appendChild(notesDetail);
+                    }
+                    
+                    eventPill.appendChild(eventTitle);
+                    eventPill.appendChild(eventDetails);
+                    eventsContainer.appendChild(eventPill);
+                }
+            });
+        }
+        
+        // --- EVENT SUMMARY FUNCTION ---
+        function showEventSummary(set) {
+            const summaryContent = document.getElementById('summaryContent');
+            
+            // Get type labels and colors
+            const typeLabels = {
+                'blue': 'Showcase',
+                'green': 'Open Mic', 
+                'orange': 'Corporate / Private',
+                'red': 'Late Night'
+            };
+            
+            const typeColors = {
+                'blue': 'var(--accent-blue)',
+                'green': 'var(--accent-green)',
+                'orange': 'var(--accent-orange)', 
+                'red': 'var(--accent-red)'
+            };
+            
+            summaryContent.innerHTML = `
+                <form id="summaryForm" data-set-id="${set.id}">
+                    <div class="summary-header">
+                        <input type="text" id="summary-title" class="summary-title-input" value="${set.title}" placeholder="Event Title">
+                        <select id="summary-type" class="summary-type-select" style="background-color: ${typeColors[set.eventType]}">
+                            <option value="blue" ${set.eventType === 'blue' ? 'selected' : ''}>Showcase</option>
+                            <option value="green" ${set.eventType === 'green' ? 'selected' : ''}>Open Mic</option>
+                            <option value="orange" ${set.eventType === 'orange' ? 'selected' : ''}>Corporate / Private</option>
+                            <option value="red" ${set.eventType === 'red' ? 'selected' : ''}>Late Night</option>
+                        </select>
+                    </div>
+                    
+                    <div class="summary-details">
+                        <div class="summary-field">
+                            <div class="summary-field-label">Venue</div>
+                            <input type="text" id="summary-venue" class="summary-field-input" value="${set.venue}" placeholder="Venue name">
+                        </div>
+                        <div class="summary-field">
+                            <div class="summary-field-label">Date</div>
+                            <input type="date" id="summary-date" class="summary-field-input" value="${set.date}">
+                        </div>
+                    </div>
+                    
+                    <div class="summary-setlist">
+                        <div class="summary-field-label">Setlist</div>
+                        <textarea id="summary-setlist" class="summary-textarea" placeholder="Enter setlist (one joke per line)">${set.setlist || ''}</textarea>
+                    </div>
+                    
+                    <div class="summary-notes">
+                        <div class="summary-field-label">Performance Notes</div>
+                        <textarea id="summary-notes" class="summary-textarea" placeholder="Enter performance notes">${set.notes || ''}</textarea>
+                    </div>
+                    
+                    <div class="summary-actions">
+                        <button type="button" class="form-btn btn-secondary" id="summary-cancel">Cancel</button>
+                        <button type="submit" class="form-btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            `;
+            
+            // Add event listeners for the summary form
+            const summaryForm = document.getElementById('summaryForm');
+            const summaryCancel = document.getElementById('summary-cancel');
+            const summaryType = document.getElementById('summary-type');
+            
+            // Update type select background color when changed
+            summaryType.addEventListener('change', function() {
+                this.style.backgroundColor = typeColors[this.value];
+            });
+            
+            // Cancel button closes modal
+            summaryCancel.addEventListener('click', () => {
+                closeModal(eventSummaryModal);
+            });
+            
+            // Form submission saves changes
+            summaryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveSummaryChanges();
+            });
+            
+            openModal(eventSummaryModal);
+        }
+        
+        // --- SAVE SUMMARY CHANGES ---
+        function saveSummaryChanges() {
+            const form = document.getElementById('summaryForm');
+            const setId = parseInt(form.dataset.setId, 10);
+            const setIndex = setsData.findIndex(s => s.id === setId);
+            
+            if (setIndex !== -1) {
+                // Update the set data
+                setsData[setIndex] = {
+                    ...setsData[setIndex],
+                    title: document.getElementById('summary-title').value,
+                    venue: document.getElementById('summary-venue').value,
+                    date: document.getElementById('summary-date').value,
+                    eventType: document.getElementById('summary-type').value,
+                    setlist: document.getElementById('summary-setlist').value,
+                    notes: document.getElementById('summary-notes').value
+                };
+                
+                // Close modal and refresh calendar
+                closeModal(eventSummaryModal);
+                renderCalendar();
+            }
+        }
+        
+        // --- MODAL & MENU LOGIC ---
+        function openModal(modal) { modal.classList.add('is-visible'); }
+        function closeModal(modal) { modal.classList.remove('is-visible'); }
+
+        document.querySelectorAll('.modal-overlay, .modal-close-btn, .modal-cancel-btn').forEach(el => {
+            el.addEventListener('click', () => {
+                el.closest('.modal-container').classList.remove('is-visible');
+            });
+        });
+        
+        // --- MIC DATA AND FUNCTIONS ---
+        let allMics = [];
+        let filteredMics = [];
+
+        // Function to load mic data from CSV (same logic as main app)
+        function loadMicsFromCSV(callback) {
+            Papa.parse('coordinates.csv', {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const processedMics = results.data.map((row, index) => {
+                        // Process the CSV data to match the expected format
+                        return {
+                            id: `mic-${index}`,
+                            venue: row['Venue Name'] || row.venue || '',
+                            address: row['Location'] || row.address || '',
+                            borough: row['Borough'] || row.borough || '',
+                            neighborhood: row['Neighborhood'] || row.neighborhood || '',
+                            day: row['Day'] || row.day || '',
+                            time: row['Start Time'] || row.time || '',
+                            signupTime: row['Sign-Up Instructions'] || row.signupTime || '',
+                            host: row['Host(s) / Organizer'] || row.host || '',
+                            details: row['Other Rules'] || row.details || '',
+                            cost: row['Cost'] || row.cost || 'Free',
+                            signup: row['Sign-Up Instructions'] || row.signup || '',
+                            lat: parseFloat(row['Geocodio Latitude'] || row.lat || 0),
+                            lon: parseFloat(row['Geocodio Longitude'] || row.lon || 0),
+                            isFree: (row['Cost'] || row.cost || 'Free').toLowerCase().includes('free'),
+                            hasSignup: !!(row['Sign-Up Instructions'] || row.signupTime)
+                        };
+                    }).filter(mic => mic.venue && mic.day); // Filter out invalid entries
+                    
+                    callback(processedMics);
+                },
+                error: function(error) {
+                    console.error('Error loading CSV:', error);
+                    callback([]);
+                }
+            });
+        }
+
+        function loadMicData() {
+            // Try to get data from main app state if available
+            if (window.MicFinderState && typeof window.MicFinderState.getAllMics === 'function') {
+                const mainAppMics = window.MicFinderState.getAllMics();
+                if (mainAppMics && mainAppMics.length > 0) {
+                    allMics = mainAppMics;
+                    filteredMics = [...allMics];
+                    renderMicsList();
+                    return;
+                }
+            }
+            
+            // Try to load from main app's loader function
+            if (window.loadMicData && typeof window.loadMicData === 'function') {
+                window.loadMicData((mics) => {
+                    allMics = mics || [];
+                    filteredMics = [...allMics];
+                    renderMicsList();
+                });
+                return;
+            }
+            
+            // Fallback: Load directly from CSV
+            loadMicsFromCSV((mics) => {
+                allMics = mics || [];
+                filteredMics = [...allMics];
+                renderMicsList();
+            });
+        }
+
+        function filterMics() {
+            const searchTerm = micSearch.value.toLowerCase();
+            const selectedDay = dayFilter.value;
+            
+            filteredMics = allMics.filter(mic => {
+                const matchesSearch = mic.venue.toLowerCase().includes(searchTerm) || 
+                                    (mic.address && mic.address.toLowerCase().includes(searchTerm)) ||
+                                    (mic.borough && mic.borough.toLowerCase().includes(searchTerm)) ||
+                                    (mic.neighborhood && mic.neighborhood.toLowerCase().includes(searchTerm)) ||
+                                    (mic.host && mic.host.toLowerCase().includes(searchTerm));
+                const matchesDay = selectedDay === 'all' || mic.day === selectedDay;
+                return matchesSearch && matchesDay;
+            });
+            
+            renderMicsList();
+        }
+
+        function renderMicsList() {
+            if (filteredMics.length === 0) {
+                micsList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No mics found. Try adjusting your filters or check if data is loading.</div>';
+                return;
+            }
+            
+            const micsHTML = filteredMics.map(mic => `
+                <div class="mic-item" data-mic-id="${mic.id}">
+                    <div class="mic-info">
+                        <div class="mic-venue">${mic.venue}</div>
+                        <div class="mic-details">
+                            <span><i class="fas fa-calendar-day"></i> ${mic.day}</span>
+                            <span><i class="fas fa-clock"></i> ${mic.time}</span>
+                            <span><i class="fas fa-dollar-sign"></i> ${mic.cost}</span>
+                            ${mic.host ? `<span><i class="fas fa-user"></i> ${mic.host}</span>` : ''}
+                            ${mic.borough ? `<span><i class="fas fa-map-marker-alt"></i> ${mic.borough}</span>` : ''}
+                            ${mic.neighborhood ? `<span><i class="fas fa-map-pin"></i> ${mic.neighborhood}</span>` : ''}
+                        </div>
+                        ${mic.signupTime ? `<div class="mic-details" style="margin-top: 0.25rem;"><span><i class="fas fa-clipboard-list"></i> ${mic.signupTime}</span></div>` : ''}
+                    </div>
+                    <button class="mic-select-btn" data-mic-id="${mic.id}">Select</button>
+                </div>
+            `).join('');
+            
+            micsList.innerHTML = micsHTML;
+        }
+
+        function selectMic(micId) {
+            const selectedMic = allMics.find(mic => mic.id === micId);
+            if (!selectedMic) return;
+            
+            // Close mic selection modal
+            closeModal(micSelectionModal);
+            
+            // Pre-populate the add set form
+            formTitle.textContent = 'Log New Set from Mic';
+            setForm.reset();
+            setIdInput.value = '';
+            
+            // Fill in venue name
+            document.getElementById('venue').value = selectedMic.venue;
+            
+            // Set event title to "Open Mic" by default
+            document.getElementById('event-title').value = 'Open Mic';
+            
+            // Set event type to open mic (green)
+            document.getElementById('event-type').value = 'green';
+            
+            // Calculate next date for this day of week
+            const today = new Date();
+            const targetDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(selectedMic.day);
+            const daysUntilTarget = (targetDay - today.getDay() + 7) % 7;
+            const nextDate = new Date(today);
+            nextDate.setDate(today.getDate() + (daysUntilTarget === 0 ? 7 : daysUntilTarget));
+            
+            document.getElementById('date').value = nextDate.toISOString().split('T')[0];
+            
+            // Open the add set modal
+            openModal(addEditModal);
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('addSetBtn').addEventListener('click', () => {
+            formTitle.textContent = 'Log a New Set';
+            setForm.reset();
+            setIdInput.value = '';
+            openModal(addEditModal);
+        });
+
+        document.getElementById('addMicBtn').addEventListener('click', () => {
+            openModal(micSelectionModal);
+            
+            // Show loading state
+            micsList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading mics...</div>';
+            
+            // Load data
+            loadMicData();
+        });
+
+        micSearch.addEventListener('input', filterMics);
+        dayFilter.addEventListener('change', filterMics);
+        
+        // Event listener for mic selection buttons
+        micsList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('mic-select-btn')) {
+                const micId = e.target.dataset.micId;
+                selectMic(micId);
+            }
+        });
+        
+        document.getElementById('expandBtn').addEventListener('click', () => {
+            isExpandedView = !isExpandedView;
+            calendarContainer.classList.toggle('is-expanded');
+            const icon = document.getElementById('expandBtn').querySelector('i');
+            icon.className = isExpandedView ? 'fas fa-compress' : 'fas fa-expand';
+            renderCalendar();
+        });
+
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            if(isExpandedView) currentWeek.setMonth(currentWeek.getMonth() - 1);
+            else currentWeek.setDate(currentWeek.getDate() - 7);
+            renderCalendar();
+        });
+
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+             if(isExpandedView) currentWeek.setMonth(currentWeek.getMonth() + 1);
+            else currentWeek.setDate(currentWeek.getDate() + 7);
+            renderCalendar();
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            currentWeek = new Date();
+            renderCalendar();
+        });
+
+        document.getElementById('calendarIconBtn').addEventListener('click', () => {
+            window.location.href = 'set_list_Calendar.html';
+        });
+        
+        // Navigation buttons
+        document.getElementById('mapNavBtn')?.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+        
+        document.getElementById('calendarNavBtn')?.addEventListener('click', () => {
+            // Already on calendar - could show feedback or do nothing
+        });
+        
+        // View toggle functionality
+        let currentView = 'week';
+        
+        document.getElementById('weekViewBtn').addEventListener('click', () => {
+            setActiveView('week');
+            isExpandedView = false;
+            calendarContainer.classList.remove('is-expanded');
+            const expandIcon = document.getElementById('expandBtn').querySelector('i');
+            expandIcon.className = 'fas fa-expand';
+            renderCalendar();
+        });
+        
+        document.getElementById('monthViewBtn').addEventListener('click', () => {
+            setActiveView('month');
+            isExpandedView = true;
+            calendarContainer.classList.add('is-expanded');
+            const expandIcon = document.getElementById('expandBtn').querySelector('i');
+            expandIcon.className = 'fas fa-compress';
+            renderCalendar();
+        });
+        
+        document.getElementById('listViewBtn').addEventListener('click', () => {
+            setActiveView('list');
+            showListView();
+        });
+        
+        function setActiveView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-toggle-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${view}ViewBtn`).classList.add('active');
+        }
+        
+        function showListView() {
+            const venueQuery = venueSearch.value.toLowerCase();
+            const typeQuery = typeFilter.value;
+            
+            const filteredSets = setsData.filter(set => {
+                const venueMatch = set.venue.toLowerCase().includes(venueQuery);
+                const typeMatch = typeQuery === 'all' || set.eventType === typeQuery;
+                return venueMatch && typeMatch;
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const listHTML = filteredSets.map(set => {
+                const date = new Date(set.date);
+                const jokeCount = set.setlist ? set.setlist.split('\\n').filter(line => line.trim()).length : 0;
+                const typeLabels = {
+                    'blue': 'Showcase',
+                    'green': 'Open Mic',
+                    'orange': 'Corporate / Private',
+                    'red': 'Late Night'
+                };
+                
+                return `
+                    <div class=\"list-item event-${set.eventType}\" data-set-id=\"${set.id}\" style=\"margin-bottom: 1rem; padding: 1rem; background: var(--bg-surface-2); border-radius: 8px; cursor: pointer; border-left: 4px solid;\">
+                        <div style=\"display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;\">
+                            <h4 style=\"margin: 0; font-size: 1.1rem; font-weight: 600;\">${set.title}</h4>
+                            <span style=\"font-size: 0.8rem; padding: 0.25rem 0.75rem; background: var(--accent-blue); color: white; border-radius: 12px;\">${typeLabels[set.eventType]}</span>
+                        </div>
+                        <div style=\"display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);\">
+                            <div><i class=\"fas fa-calendar\"></i> ${date.toLocaleDateString()}</div>
+                            <div><i class=\"fas fa-map-marker-alt\"></i> ${set.venue}</div>
+                            ${jokeCount > 0 ? `<div><i class=\"fas fa-list\"></i> ${jokeCount} jokes</div>` : ''}
+                            ${set.notes ? `<div><i class=\"fas fa-sticky-note\"></i> ${set.notes.length > 50 ? set.notes.substring(0, 50) + '...' : set.notes}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            calendarGrid.innerHTML = `
+                <div style=\"grid-column: 1 / -1; padding: 1rem 0;\">
+                    <h3 style=\"margin-bottom: 1rem; color: var(--text-primary);\">All Sets (${filteredSets.length})</h3>
+                    ${listHTML || '<div style=\"text-align: center; color: var(--text-secondary); padding: 2rem;\">No sets found</div>'}
+                </div>
+            `;
+            
+            // Add click handlers for list items
+            document.querySelectorAll('.list-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const setId = parseInt(item.dataset.setId, 10);
+                    const set = setsData.find(s => s.id === setId);
+                    if (set) {
+                        // Open the same edit form as "Add Set"
+                        formTitle.textContent = 'Edit Set';
+                        setIdInput.value = set.id;
+                        document.getElementById('event-title').value = set.title;
+                        document.getElementById('venue').value = set.venue;
+                        document.getElementById('date').value = set.date;
+                        document.getElementById('event-type').value = set.eventType;
+                        document.getElementById('setlist').value = set.setlist || '';
+                        document.getElementById('notes').value = set.notes || '';
+                        openModal(addEditModal);
+                    }
+                });
+            });
+        }
+        
+        // Bottom navigation handlers
+        document.getElementById('statsNavBtn')?.addEventListener('click', () => {
+            showStatsModal();
+        });
+        
+        document.getElementById('settingsNavBtn')?.addEventListener('click', () => {
+            showSettingsModal();
+        });
+        
+        function showStatsModal() {
+            // Simple stats modal
+            const totalSets = setsData.length;
+            const venues = [...new Set(setsData.map(s => s.venue))];
+            const totalJokes = setsData.reduce((total, set) => {
+                return total + (set.setlist ? set.setlist.split('\\n').filter(line => line.trim()).length : 0);
+            }, 0);
+            
+            const statsHTML = `
+                <h3>Performance Statistics</h3>
+                <div style=\"display: grid; gap: 1rem; margin: 2rem 0;\">
+                    <div style=\"text-align: center; padding: 1rem; background: var(--bg-surface-2); border-radius: 8px;\">
+                        <div style=\"font-size: 2rem; font-weight: 700; color: var(--accent-blue);\">${totalSets}</div>
+                        <div style=\"color: var(--text-secondary);\">Total Sets</div>
+                    </div>
+                    <div style=\"text-align: center; padding: 1rem; background: var(--bg-surface-2); border-radius: 8px;\">
+                        <div style=\"font-size: 2rem; font-weight: 700; color: var(--accent-green);\">${venues.length}</div>
+                        <div style=\"color: var(--text-secondary);\">Venues Performed</div>
+                    </div>
+                    <div style=\"text-align: center; padding: 1rem; background: var(--bg-surface-2); border-radius: 8px;\">
+                        <div style=\"font-size: 2rem; font-weight: 700; color: var(--accent-orange);\">${totalJokes}</div>
+                        <div style=\"color: var(--text-secondary);\">Total Jokes</div>
+                    </div>
+                </div>
+                <button onclick=\"closeModal(eventSummaryModal)\" style=\"width: 100%; padding: 0.75rem; background: var(--accent-blue); color: white; border: none; border-radius: 6px; cursor: pointer;\">Close</button>
+            `;
+            
+            document.getElementById('summaryContent').innerHTML = statsHTML;
+            openModal(eventSummaryModal);
+        }
+        
+        function showSettingsModal() {
+            const settingsHTML = `
+                <h3>Settings</h3>
+                <div style=\"margin: 2rem 0;\">
+                    <div style=\"margin-bottom: 1rem;\">
+                        <label style=\"display: block; margin-bottom: 0.5rem; font-weight: 500;\">Default View</label>
+                        <select style=\"width: 100%; padding: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);\">
+                            <option value=\"week\">Week View</option>
+                            <option value=\"month\">Month View</option>
+                            <option value=\"list\">List View</option>
+                        </select>
+                    </div>
+                    <div style=\"margin-bottom: 1rem;\">
+                        <label style=\"display: block; margin-bottom: 0.5rem; font-weight: 500;\">Theme</label>
+                        <select style=\"width: 100%; padding: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);\">
+                            <option value=\"dark\">Dark Mode</option>
+                            <option value=\"light\">Light Mode</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick=\"closeModal(eventSummaryModal)\" style=\"width: 100%; padding: 0.75rem; background: var(--accent-blue); color: white; border: none; border-radius: 6px; cursor: pointer;\">Save Settings</button>
+            `;
+            
+            document.getElementById('summaryContent').innerHTML = settingsHTML;
+            openModal(eventSummaryModal);
+        }
+        
+        // Enhanced search functionality
+        venueSearch.addEventListener('input', renderCalendar);
+        typeFilter.addEventListener('change', renderCalendar);
+        
+        // Advanced search toggle
+        document.getElementById('advancedSearchToggle').addEventListener('click', () => {
+            const advancedSearch = document.getElementById('advancedSearch');
+            const toggle = document.getElementById('advancedSearchToggle');
+            
+            advancedSearch.classList.toggle('active');
+            const isActive = advancedSearch.classList.contains('active');
+            toggle.style.background = isActive ? 'var(--accent-blue)' : '';
+            toggle.style.color = isActive ? 'white' : '';
+        });
+        
+        // Advanced search filters
+        document.getElementById('dateFrom')?.addEventListener('change', renderCalendar);
+        document.getElementById('dateTo')?.addEventListener('change', renderCalendar);
+        document.getElementById('minJokes')?.addEventListener('input', renderCalendar);
+        
+        // Clear filters
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            venueSearch.value = '';
+            typeFilter.value = 'all';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('minJokes').value = '';
+            renderCalendar();
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+F - Focus search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                venueSearch.focus();
+                venueSearch.select();
+            }
+            
+            // Ctrl+T - Go to today
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                currentWeek = new Date();
+                renderCalendar();
+                showNotification('Jumped to today', 'info');
+            }
+            
+            // Escape - Close modals and clear search
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-container').forEach(modal => {
+                    modal.classList.remove('is-visible');
+                });
+                contextMenu.style.display = 'none';
+                
+                if (document.activeElement === venueSearch && venueSearch.value) {
+                    venueSearch.value = '';
+                    renderCalendar();
+                }
+            }
+            
+            // Arrow keys for navigation
+            if (!e.target.matches('input, select, textarea')) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    document.getElementById('prevWeekBtn').click();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    document.getElementById('nextWeekBtn').click();
+                }
+            }
+            
+            // 1-3 for view switching
+            if (!e.target.matches('input, select, textarea')) {
+                if (e.key === '1') {
+                    e.preventDefault();
+                    document.getElementById('weekViewBtn').click();
+                } else if (e.key === '2') {
+                    e.preventDefault();
+                    document.getElementById('monthViewBtn').click();
+                } else if (e.key === '3') {
+                    e.preventDefault();
+                    document.getElementById('listViewBtn').click();
+                }
+            }
+        });
+
+        // Context menu and form submission logic
+        calendarGrid.addEventListener('contextmenu', (e) => {
+            const pill = e.target.closest('.event-pill');
+            if (pill) {
+                e.preventDefault();
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.style.top = `${e.pageY}px`;
+                contextMenu.dataset.setId = pill.dataset.setId; // Store ID on menu
+            }
+        });
+
+        // Click event listener for event pills to edit set
+        calendarGrid.addEventListener('click', (e) => {
+            const pill = e.target.closest('.event-pill');
+            if (pill) {
+                const setId = parseInt(pill.dataset.setId, 10);
+                const set = setsData.find(s => s.id === setId);
+                if (set) {
+                    // Open the same edit form as "Add Set"
+                    formTitle.textContent = 'Edit Set';
+                    setIdInput.value = set.id;
+                    document.getElementById('event-title').value = set.title;
+                    document.getElementById('venue').value = set.venue;
+                    document.getElementById('date').value = set.date;
+                    document.getElementById('event-type').value = set.eventType;
+                    document.getElementById('setlist').value = set.setlist || '';
+                    document.getElementById('notes').value = set.notes || '';
+                    openModal(addEditModal);
+                }
+            }
+        });
+        
+        contextMenu.addEventListener('click', (e) => {
+            const menuItem = e.target.closest('.context-menu-item');
+            if (!menuItem) return;
+            
+            const action = menuItem.dataset.action;
+            const setId = parseInt(contextMenu.dataset.setId, 10);
+            const set = setsData.find(s => s.id === setId);
+
+            if (action === 'edit') {
+                formTitle.textContent = 'Edit Set';
+                setIdInput.value = set.id;
+                document.getElementById('event-title').value = set.title;
+                document.getElementById('venue').value = set.venue;
+                document.getElementById('date').value = set.date;
+                document.getElementById('event-type').value = set.eventType;
+                document.getElementById('setlist').value = set.setlist || '';
+                document.getElementById('notes').value = set.notes || '';
+                openModal(addEditModal);
+            } else if (action === 'delete') {
+                set_to_delete = setId; // Store which set to delete
+                openModal(deleteConfirmModal);
+            }
+            contextMenu.style.display = 'none';
+        });
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (set_to_delete !== null) {
+                setsData = setsData.filter(set => set.id !== set_to_delete);
+                closeModal(deleteConfirmModal);
+                renderCalendar();
+                set_to_delete = null;
+            }
+        });
+
+        setForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(setForm);
+            const id = parseInt(formData.get('setId'), 10);
+            const setData = {
+                title: formData.get('event-title'),
+                venue: formData.get('venue'),
+                date: formData.get('date'),
+                eventType: formData.get('eventType'),
+                setlist: formData.get('setlist'),
+                notes: formData.get('notes'),
+            };
+
+            if (id) { // Editing existing
+                const index = setsData.findIndex(s => s.id === id);
+                setsData[index] = { ...setsData[index], ...setData };
+            } else { // Adding new
+                setData.id = Date.now(); // Simple unique ID
+                setsData.push(setData);
+            }
+            closeModal(addEditModal);
+            renderCalendar();
+        });
+
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
+
+        // Check for pending calendar action from main mic finder
+        function checkPendingCalendarAction() {
+            const pendingAction = localStorage.getItem('pendingCalendarAction');
+            if (pendingAction) {
+                try {
+                    const data = JSON.parse(pendingAction);
+                    if (data.action === 'addMic' && data.mic) {
+                        // Clear the pending action
+                        localStorage.removeItem('pendingCalendarAction');
+                        
+                        // Pre-populate the form with mic data
+                        formTitle.textContent = 'Log New Set from Mic';
+                        setForm.reset();
+                        setIdInput.value = '';
+                        
+                        // Fill in the form fields
+                        document.getElementById('venue').value = data.mic.venue;
+                        document.getElementById('event-title').value = 'Open Mic';
+                        document.getElementById('event-type').value = 'green';
+                        document.getElementById('date').value = data.suggestedDate;
+                        
+                        // Add some context in notes
+                        const notesField = document.getElementById('notes');
+                        let notes = `Added from Mic Finder.\n`;
+                        if (data.mic.host) notes += `Host: ${data.mic.host}\n`;
+                        if (data.mic.cost) notes += `Cost: ${data.mic.cost}\n`;
+                        if (data.mic.signupTime) notes += `Signup: ${data.mic.signupTime}\n`;
+                        if (data.mic.address) notes += `Address: ${data.mic.address}\n`;
+                        notesField.value = notes;
+                        
+                        // Open the add set modal
+                        openModal(addEditModal);
+                        
+                        // Show success notification
+                        showNotification(`Pre-filled form with ${data.mic.venue} details!`);
+                    }
+                } catch (error) {
+                    console.error('Error processing pending calendar action:', error);
+                    localStorage.removeItem('pendingCalendarAction');
+                }
+            }
+        }
+        
+        // Function to show notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'var(--accent-green)' : 'var(--accent-blue)';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 600;
+                max-width: 300px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // --- INITIAL RENDER ---
+        renderCalendar();
+        
+        // Check for pending actions after initial render
+        setTimeout(checkPendingCalendarAction, 500);
+    });
+    </script>
+
+</body>
+</html>

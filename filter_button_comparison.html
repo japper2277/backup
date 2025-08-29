@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Filters Button Color Comparison</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-8">"All Filters" Button Color Comparison</h1>
+        
+        <!-- Comparison Section -->
+        <div class="space-y-12">
+            
+            <!-- Option 1: Current Dark Style -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Option 1: Current Dark Style</h2>
+                <p class="text-sm text-gray-600 mb-4">Same dark background as filter pills (current implementation)</p>
+                <div class="flex flex-wrap items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <!-- Current Dark "All Filters" Button -->
+                    <button class="bg-gray-900/80 backdrop-blur-sm text-white border border-white/10 shadow-md hover:bg-black/70 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                        </svg>
+                        All Filters
+                    </button>
+                    <!-- Sample filter pills for context -->
+                    <button class="bg-gray-900/80 backdrop-blur-sm text-white border border-white/10 shadow-md text-sm font-medium py-2.5 px-5 rounded-full transition-colors">Saturday</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Manhattan</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Free</button>
+                </div>
+                <div class="mt-3 text-xs text-gray-500">
+                    <strong>Pros:</strong> Maintains consistency with selected pills<br>
+                    <strong>Cons:</strong> Doesn't distinguish between main action and filter toggles
+                </div>
+            </div>
+
+            <!-- Option 2: Airbnb White Style -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Option 2: Airbnb White Style</h2>
+                <p class="text-sm text-gray-600 mb-4">White background with gray border (true Airbnb style)</p>
+                <div class="flex flex-wrap items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <!-- Airbnb White "All Filters" Button -->
+                    <button class="bg-white text-gray-800 border border-gray-300 shadow-md hover:border-gray-400 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                        </svg>
+                        All Filters
+                    </button>
+                    <!-- Sample filter pills for context -->
+                    <button class="bg-gray-900/80 backdrop-blur-sm text-white border border-white/10 shadow-md text-sm font-medium py-2.5 px-5 rounded-full transition-colors">Saturday</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Manhattan</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Free</button>
+                </div>
+                <div class="mt-3 text-xs text-gray-500">
+                    <strong>Pros:</strong> Clear visual hierarchy, matches Airbnb pattern, distinct from filter pills<br>
+                    <strong>Cons:</strong> Might not fit with your dark theme aesthetic
+                </div>
+            </div>
+
+            <!-- Option 3: Light Gray Style -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Option 3: Light Gray Style</h2>
+                <p class="text-sm text-gray-600 mb-4">Light gray background with dark text (compromise option)</p>
+                <div class="flex flex-wrap items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <!-- Light Gray "All Filters" Button -->
+                    <button class="bg-gray-200 text-gray-800 border border-gray-300 shadow-md hover:bg-gray-300 hover:border-gray-400 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                        </svg>
+                        All Filters
+                    </button>
+                    <!-- Sample filter pills for context -->
+                    <button class="bg-gray-900/80 backdrop-blur-sm text-white border border-white/10 shadow-md text-sm font-medium py-2.5 px-5 rounded-full transition-colors">Saturday</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Manhattan</button>
+                    <button class="bg-white text-gray-700 border border-gray-300 text-sm font-medium py-2.5 px-5 rounded-full hover:border-gray-400 transition-colors">Free</button>
+                </div>
+                <div class="mt-3 text-xs text-gray-500">
+                    <strong>Pros:</strong> Distinct from pills, softer than white, maintains some consistency<br>
+                    <strong>Cons:</strong> Less dramatic distinction than white option
+                </div>
+            </div>
+
+            <!-- Side by Side Direct Comparison -->
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">Direct Comparison</h2>
+                <p class="text-sm text-gray-600 mb-4">All three buttons side by side</p>
+                <div class="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                    <!-- Dark -->
+                    <div class="text-center">
+                        <button class="bg-gray-900/80 backdrop-blur-sm text-white border border-white/10 shadow-md hover:bg-black/70 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                            </svg>
+                            All Filters
+                        </button>
+                        <div class="text-xs text-gray-600">Dark (Current)</div>
+                    </div>
+                    
+                    <!-- White -->
+                    <div class="text-center">
+                        <button class="bg-white text-gray-800 border border-gray-300 shadow-md hover:border-gray-400 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                            </svg>
+                            All Filters
+                        </button>
+                        <div class="text-xs text-gray-600">White (Airbnb)</div>
+                    </div>
+                    
+                    <!-- Light Gray -->
+                    <div class="text-center">
+                        <button class="bg-gray-200 text-gray-800 border border-gray-300 shadow-md hover:bg-gray-300 hover:border-gray-400 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+                            </svg>
+                            All Filters
+                        </button>
+                        <div class="text-xs text-gray-600">Light Gray</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-blue-800 mb-2">Design Recommendation</h2>
+                <p class="text-sm text-blue-700">
+                    Based on UX best practices and the Airbnb pattern, <strong>Option 2 (White Style)</strong> is recommended. 
+                    It creates the clearest visual hierarchy and helps users understand that the "All Filters" button 
+                    serves a different function than the individual filter pills.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

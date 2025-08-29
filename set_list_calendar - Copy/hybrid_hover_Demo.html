@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Library - Hybrid Hover Demo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #121212;
+            --bg-surface: #181818;
+            --bg-surface-2: #282828;
+            --border-color: #3e4042;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-green: #1DB954;
+            --accent-blue: #45a3ff;
+            --accent-orange: #f5c518;
+            --status-idea: #808080;
+            --status-workshopping: #f5c518;
+            --status-tight5: #45a3ff;
+            --status-showready: #1DB954;
+        }
+        body { font-family: var(--font-sans); background-color: var(--bg-main); color: var(--text-primary); margin: 0; padding: 2rem; }
+        .playground-container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; }
+        
+        .joke-bank-panel { background: var(--bg-main); display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); background: var(--bg-surface-2); display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .panel-header h4 { margin: 0; font-size: 0.9rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        
+        .joke-bank-list { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem; height: 450px; overflow-y: auto; }
+        .joke-bank-item { background: var(--bg-surface-2); border-radius: 6px; padding: 0.75rem; transition: background-color 0.2s ease, transform 0.15s ease-out; position: relative; border-left: 3px solid transparent; cursor: pointer; }
+        .joke-item-text { font-size: 0.9rem; line-height: 1.3; color: var(--text-primary); margin-bottom: 0.5rem; }
+        
+        .metadata-pill { padding: 0.125rem 0.6rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; color: white; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .status-pill { background-color: var(--status-idea); }
+        .status-Workshopping { background-color: var(--status-workshopping); }
+        .status-Tight-5-Ready { background-color: var(--status-tight5); }
+        .status-Show-Ready { background-color: var(--status-showready); }
+        .type-pill { background-color: var(--accent-blue); }
+        .clean-pill { background-color: var(--accent-green); }
+
+        .joke-card-second-line { display: flex; justify-content: space-between; align-items: center; }
+        .left-meta, .right-meta { display: flex; align-items: center; gap: 0.5rem; cursor: context-menu; padding: 0.25rem; border-radius: 4px; }
+
+        /* REFINED INTERACTION: Smooth fade-in for metadata */
+        .joke-card-second-line > * { opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .joke-bank-item:hover .joke-card-second-line > * { opacity: 1; }
+        .left-locked .left-meta { opacity: 1; }
+        .right-locked .right-meta { opacity: 1; }
+
+        #contextMenu {
+            display: none; position: absolute; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000;
+        }
+        .context-menu-item { background: none; border: none; color: var(--text-primary); padding: 0.5rem 1rem; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        .context-menu-item:hover { background-color: var(--bg-surface-2); }
+        .context-menu-item i { width: 16px; text-align: center; color: var(--text-secondary); }
+
+        /* NEW: Discoverable View Options */
+        .view-options-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1rem; padding: 0.25rem; }
+        .view-options-popover {
+            position: absolute; top: 100%; right: 0.5rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            /* POLISH: Animate the popover */
+            transform-origin: top right;
+            transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+            transform: scale(0.9);
+            opacity: 0;
+            display: block;
+            visibility: hidden;
+        }
+        .view-options-popover.visible {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .lock-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .lock-group label { margin: 0; font-weight: normal; font-size: 0.9rem; }
+
+        /* POLISH: Animate the pill locking */
+        @keyframes quick-flash {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .flash-feedback {
+            animation: quick-flash 0.3s ease-in-out;
+        }
+        
+        /* POLISH: Active state for right-click */
+        .joke-bank-item.context-active {
+            transform: scale(0.98);
+            background-color: var(--bg-surface);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="playground-container">
+        <h1>Hybrid Hover Demo</h1>
+        
+        <div class="joke-bank-panel">
+            <div class="panel-header">
+                <h4><i class="fas fa-book-open"></i> Your Jokes</h4>
+                <button class="view-options-btn" id="viewOptionsBtn" title="View Options"><i class="fas fa-ellipsis-h"></i></button>
+                
+                <div class="view-options-popover" id="viewOptionsPopover">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem;">Lock Pill Visibility</label>
+                    <div class="lock-group">
+                        <input type="checkbox" id="lockLeftPill">
+                        <label for="lockLeftPill">Status Pill (Left)</label>
+                    </div>
+                    <div class="lock-group">
+                        <input type="checkbox" id="lockRightPills">
+                        <label for="lockRightPills">Metadata Pills (Right)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="joke-bank-list" id="jokeBankList"></div>
+        </div>
+    </div>
+
+    <!-- DIFFERENTIATED MENU: This is now an action menu -->
+    <div id="contextMenu">
+        <button class="context-menu-item" data-action="edit-joke"><i class="fas fa-pencil-alt"></i> Edit Joke</button>
+        <button class="context-menu-item" data-action="view-history"><i class="fas fa-history"></i> View Full History</button>
+        <button class="context-menu-item" data-action="add-to-collection"><i class="fas fa-plus"></i> Add to Collection...</button>
+        <hr style="border-color: var(--border-color); margin: 0.5rem 0;">
+        <button class="context-menu-item" data-action="archive-joke" style="color: var(--accent-orange);"><i class="fas fa-archive"></i> Archive Joke</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dataStore = {
+            jokes: [
+                { id: 101, text: 'Airplane food joke', jokeType: 'Observational', readinessStatus: 'Show Ready', isClean: true },
+                { id: 102, text: 'My cat is so lazy...', jokeType: 'One-liner', readinessStatus: 'Tight 5 Ready', isClean: true },
+                { id: 103, text: 'New 5 minutes about coffee shops', jokeType: 'Observational', readinessStatus: 'Workshopping', isClean: false },
+                { id: 104, text: 'A premise about self-driving cars', jokeType: 'Story', readinessStatus: 'Idea', isClean: true },
+            ],
+            getAllJokes: function() { return this.jokes; }
+        };
+
+        const jokeBankEl = document.getElementById('jokeBankList');
+        const contextMenu = document.getElementById('contextMenu');
+        const viewOptionsBtn = document.getElementById('viewOptionsBtn');
+        const viewOptionsPopover = document.getElementById('viewOptionsPopover');
+        const lockLeftCheck = document.getElementById('lockLeftPill');
+        const lockRightCheck = document.getElementById('lockRightPills');
+
+        let isLeftLocked = true;
+        let isRightLocked = false;
+        let activeContextItem = null;
+
+        function closeAllPopups() {
+            contextMenu.style.display = 'none';
+            viewOptionsPopover.classList.remove('visible');
+            if (activeContextItem) {
+                activeContextItem.classList.remove('context-active');
+                activeContextItem = null;
+            }
+        }
+
+        function syncUI() {
+            jokeBankEl.classList.toggle('left-locked', isLeftLocked);
+            jokeBankEl.classList.toggle('right-locked', isRightLocked);
+            lockLeftCheck.checked = isLeftLocked;
+            lockRightCheck.checked = isRightLocked;
+        }
+
+        function renderJokeLibrary() {
+            jokeBankEl.className = 'joke-bank-list';
+            syncUI();
+
+            jokeBankEl.innerHTML = dataStore.getAllJokes().map(joke => {
+                const statusClass = joke.readinessStatus.replace(/ /g, '-');
+                const statusIcon = { 'Idea': 'fa-lightbulb', 'Workshopping': 'fa-tools', 'Tight 5 Ready': 'fa-microphone', 'Show Ready': 'fa-star' }[joke.readinessStatus];
+                return `
+                    <div class="joke-bank-item" data-joke-id="${joke.id}" data-status="${joke.readinessStatus}">
+                        <div class="joke-item-text">${joke.text}</div>
+                        <div class="joke-card-second-line">
+                            <div class="left-meta"><div class="metadata-pill status-pill status-${statusClass}" data-type="${joke.jokeType}"><i class="fas ${statusIcon}"></i><span>${joke.readinessStatus}</span></div></div>
+                            <div class="right-meta"><div class="metadata-pill type-pill"><i class="fas fa-book-open"></i><span>${joke.jokeType}</span></div>${joke.isClean ? `<div class="metadata-pill clean-pill"><i class="fas fa-soap"></i><span>Clean</span></div>` : ''}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+        
+        jokeBankEl.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const targetItem = e.target.closest('.joke-bank-item');
+            if (!targetItem) return;
+            
+            closeAllPopups(); // Close any existing popups first
+            activeContextItem = targetItem;
+            activeContextItem.classList.add('context-active');
+
+            contextMenu.dataset.jokeId = targetItem.dataset.jokeId;
+            
+            // POLISH: Anchor the context menu to the card
+            const cardRect = targetItem.getBoundingClientRect();
+            contextMenu.style.display = 'block';
+            contextMenu.style.top = `${cardRect.top + 20}px`;
+            contextMenu.style.left = `${cardRect.right - contextMenu.offsetWidth - 10}px`;
+        });
+
+        contextMenu.addEventListener('click', e => {
+            const action = e.target.closest('.context-menu-item')?.dataset.action;
+            const jokeId = contextMenu.dataset.jokeId;
+            if (!action || !jokeId) return;
+            alert(`Action: '${action}' on Joke ID: ${jokeId}`);
+            closeAllPopups();
+        });
+        
+        viewOptionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = viewOptionsPopover.classList.contains('visible');
+            closeAllPopups();
+            
+            if (!isVisible) {
+                viewOptionsPopover.classList.add('visible');
+            }
+        });
+
+        lockLeftCheck.addEventListener('change', () => {
+            isLeftLocked = lockLeftCheck.checked;
+            syncUI();
+            document.querySelectorAll('.left-meta').forEach(el => {
+                el.classList.add('flash-feedback');
+                el.addEventListener('animationend', () => el.classList.remove('flash-feedback'), { once: true });
+            });
+        });
+
+        lockRightCheck.addEventListener('change', () => {
+            isRightLocked = lockRightCheck.checked;
+            syncUI();
+            document.querySelectorAll('.right-meta').forEach(el => {
+                el.classList.add('flash-feedback');
+                el.addEventListener('animationend', () => el.classList.remove('flash-feedback'), { once: true });
+            });
+        });
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#contextMenu') && !e.target.closest('.view-options-popover') && !e.target.closest('#viewOptionsBtn')) {
+                closeAllPopups();
+            }
+        });
+
+        renderJokeLibrary();
+    });
+    </script>
+</body>
+</html>

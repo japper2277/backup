@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organized Mic Finder - Interactive</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Helvetica+Neue,sans-serif&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Third-party Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="../js/micDataLoader.js"></script>
+    
+    <!-- START: Firebase SDKs - Required for Google Sign-In & Cloud Favorites -->
+    <!-- These are using a recent, stable version. Update as needed from your Firebase console. -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- END: Firebase SDKs -->
+
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="js/sidebar.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #18191a; --bg-surface: #242526; --bg-surface-2: #3a3b3c; --border-color: #3e4042;
+            --text-primary: #e4e6eb; --text-secondary: #b0b3b8; --accent-blue: #45a3ff;
+            --green: #32b977; --yellow: #f5c518; --purple: #9d6cff; --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-primary); margin: 0; }
+        .app-layout { display: flex; height: 100vh; }
+        .filter-panel { width: 320px; flex-shrink: 0; background-color: var(--bg-surface); padding: 1.5rem; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; }
+        .filter-group h3 { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.75rem 0; }
+        .filter-options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .filter-btn { background: var(--bg-surface-2); color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; }
+        .filter-btn:hover { border-color: var(--accent-blue); }
+        .filter-btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        .search-input { width: 100%; box-sizing: border-box; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.6rem; border-radius: 6px; }
+        .toggle-switch { display: flex; justify-content: space-between; align-items: center; }
+        .toggle-icon { color: var(--text-secondary); cursor: pointer; font-size: 1.8rem; }
+        .toggle-icon.fa-toggle-on { color: var(--accent-blue); }
+        
+        .main-content { flex-grow: 1; padding: 2rem; display: flex; flex-direction: column; overflow-y: hidden; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;}
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .view-switcher { display: flex; gap: 0.5rem; background: var(--bg-surface); padding: 0.25rem; border-radius: 8px; }
+        .view-switcher button, .view-switcher-btn { background: none; border: none; font-weight: 600; color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: background-color 0.2s, color 0.2s; text-decoration: none; }
+        .view-switcher button.active, .view-switcher-btn.active { background: var(--accent-blue); color: white; }
+        
+        /* User Profile / Sign In Styles */
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; }
+        #user-photo { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent-blue); }
+        #user-name { font-weight: 600; }
+        .auth-btn { background: var(--purple); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; }
+        .auth-btn:hover { background-color: #8a5ae6; }
+        .hidden { display: none !important; }
+
+        .neighborhood-filter-container { padding: 0.75rem; background-color: var(--bg-surface); border-radius: 8px; margin-bottom: 1.5rem; }
+        .neighborhood-header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 0.75rem;}
+        .neighborhood-header h3 { margin: 0; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;}
+        .neighborhood-header-controls { display: flex; align-items: center; gap: 1rem; }
+        .select-all-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s ease; }
+        .select-all-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .neighborhood-style-switcher { display: flex; gap: 0.5rem; background: var(--bg-main); padding: 0.25rem; border-radius: 8px; }
+        .neighborhood-style-switcher button { background: none; border: none; font-size: 1rem; color: var(--text-secondary); padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer; }
+        .neighborhood-style-switcher button.active { background: var(--accent-blue); color: white; }
+        .neighborhood-carousel-wrapper { overflow-x: auto; white-space: nowrap; padding-bottom: 1rem; -ms-overflow-style: none; scrollbar-width: none; }
+        .neighborhood-carousel-wrapper::-webkit-scrollbar { display: none; }
+        .neighborhood-filter-options { display: inline-flex; gap: 0.75rem; }
+        .filter-view { display: none; }
+        .filter-view.active { display: block; }
+        .badge-style-btn { cursor: pointer; background-color: var(--bg-main); padding: 0.5rem 1rem; border: 1px solid transparent; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease; }
+        .badge-style-btn .mic-count { background-color: var(--accent-blue); color: white; border-radius: 10px; padding: 0.1rem 0.5rem; font-size: 0.8rem; font-weight: 600; }
+        .badge-style-btn.active, .badge-style-btn:hover { border-color: var(--accent-blue); }
+        .badge-style-btn.active .mic-count { background-color: white; color: var(--accent-blue); }
+        .subway-style-btn { cursor: pointer; font-family: 'Helvetica Neue', sans-serif; font-weight: 700; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease; }
+        .subway-style-btn .line { width: 24px; height: 24px; border-radius: 50%; color: white; display: inline-flex; justify-content: center; align-items: center; font-size: 0.9rem; }
+        .line-1 { background-color: #EE352E; }
+        .line-2 { background-color: #EE352E; }
+        .line-3 { background-color: #EE352E; }
+        .line-4 { background-color: #00933C; }
+        .line-5 { background-color: #00933C; }
+        .line-6 { background-color: #00933C; }
+        .line-123 { background-color: #EE352E; }
+        .line-456 { background-color: #00933C; }
+        .line-7 { background-color: #B933AD; }
+        .line-ACE { background-color: #0039A6; }
+        .line-BDFM { background-color: #FF6319; }
+        .line-G { background-color: #6CBE45; }
+        .line-JZ { background-color: #996633; }
+        .line-L { background-color: #A7A9AC; }
+        .line-NQRW { background-color: #FCCC0A; color: black; }
+        .subway-style-btn.active, .subway-style-btn:hover { background-color: var(--bg-main); border-radius: 8px; }
+
+        .content-area { flex-grow: 1; overflow-y: hidden; position: relative; }
+        .list-view-content { height: 100%; overflow-y: auto; padding-right: 1rem; }
+        .neighborhood-group:first-child h2 { margin-top: 0; }
+        .neighborhood-group h2 { font-size: 1.25rem; font-weight: 700; color: var(--accent-blue); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0; }
+        .mic-card { display: flex; align-items: center; gap: 1rem; background-color: var(--bg-surface); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; box-shadow: var(--shadow-md); border-left: 4px solid transparent; transition: all 0.3s; cursor: pointer; }
+        .mic-card:hover { transform: translateY(-2px); box-shadow: 0 8px 12px rgba(0,0,0,0.2); }
+        .mic-card .time { font-size: 1.1rem; font-weight: 700; width: 80px; flex-shrink: 0;}
+        .mic-card .details { flex-grow: 1; }
+        .mic-card .venue { font-weight: 600; }
+        .mic-card .meta { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+        .mic-card .favorite { font-size: 1.2rem; color: var(--text-secondary); cursor: pointer; transition: color 0.2s, transform 0.2s; z-index: 2; position: relative; }
+        .mic-card .favorite:hover { transform: scale(1.1); }
+        .mic-card .favorite.active { color: var(--yellow); }
+        @keyframes star-pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        .mic-card .favorite.saving { animation: star-pop 0.3s ease-in-out; }
+        .status-message { color: var(--text-secondary); text-align: center; padding: 3rem; font-size: 1.1rem;}
+
+        .earlier-mics-separator {
+            background-color: var(--green);
+            color: white;
+            padding: 0.75rem 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Modal Styles */
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .modal-backdrop.visible { opacity: 1; visibility: visible; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--bg-surface-2); border-radius: 12px; width: 90%; max-width: 600px; z-index: 1001; box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .modal-backdrop.visible .modal { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { margin: 0; font-size: 1.25rem; }
+        .modal-close-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: color 0.2s ease; }
+        .modal-close-btn:hover { color: var(--text-primary); }
+        .modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
+        .modal-body p { margin: 0 0 1rem; line-height: 1.6; }
+        .modal-body .detail-item { margin-bottom: 1.25rem; }
+        .modal-body .detail-item strong { color: var(--text-secondary); display: block; margin-bottom: 0.25rem; font-size: 0.9rem; text-transform: uppercase; }
+        .modal-body .detail-item span { font-size: 1rem; }
+        .modal-body .signup-link { display: inline-block; background: var(--accent-blue); color: white; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; transition: background-color 0.2s ease; }
+        .modal-body .signup-link:hover { background-color: #3a93e6; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <div class="view-switcher" id="view-switcher">
+                        <button class="active" data-view="list"><i class="fa-solid fa-list fa-fw"></i> List</button>
+                        <a href="map_view.html" class="view-switcher-btn"><i class="fa-solid fa-map-location-dot fa-fw"></i> Map</a>
+                        <a href="calendar_page.html" class="view-switcher-btn"><i class="fa-solid fa-calendar fa-fw"></i> Calendar</a>
+                    </div>
+                    <button class="auth-btn" id="tonight-btn"><i class="fa-solid fa-bolt-lightning fa-fw"></i> Tonight's Mics</button>
+                </div>
+                <div class="user-profile">
+                    <div id="user-info" class="user-profile hidden">
+                        <img id="user-photo" src="" alt="User profile photo">
+                        <span id="user-name"></span>
+                        <button id="sign-out-btn" class="auth-btn">Sign Out</button>
+                    </div>
+                    <button id="sign-in-btn" class="auth-btn"><i class="fab fa-google"></i> Sign In with Google</button>
+                </div>
+            </header>
+            
+            <div class="neighborhood-filter-container" id="neighborhood-filter-container">
+                 <div class="neighborhood-header">
+                    <h3>Filter by Neighborhood</h3>
+                    <div class="neighborhood-header-controls">
+                        <button id="select-all-btn" class="select-all-btn">Select All</button>
+                        <div class="neighborhood-style-switcher" id="neighborhood-style-switcher">
+                            <button class="active" data-style="badge"><i class="fa-solid fa-tag"></i></button>
+                            <button data-style="subway"><i class="fa-solid fa-train-subway"></i></button>
+                        </div>
+                    </div>
+                 </div>
+                 <div id="badge-view" class="filter-view active">
+                    <div class="neighborhood-carousel-wrapper">
+                         <div class="neighborhood-filter-options" id="neighborhood-filter-badge"></div>
+                    </div>
+                 </div>
+                 <div id="subway-view" class="filter-view">
+                    <div class="neighborhood-carousel-wrapper">
+                         <div class="neighborhood-filter-options" id="neighborhood-filter-subway"></div>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="content-area">
+                <div class="list-view-content" id="mic-list-container">
+                    <div class="status-message">Loading mics...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Mic Detail Modal -->
+    <div class="modal-backdrop" id="mic-modal-backdrop">
+        <div class="modal" id="mic-modal">
+            <div class="modal-header">
+                <h2 id="modal-venue-name"></h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+
+<script>
+// START: Firebase Configuration
+// IMPORTANT: Replace this with your own Firebase project configuration.
+// You can get this from the Firebase Console > Project Settings > General.
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+// END: Firebase Configuration
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- App Constants & State ---
+    const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSa68LNbdG3Qw8H5t3vKAzVb37813EgDSJxNet6Opg3NB4KGG9rsWdRj55FloQstcLtHPm33eStflOD/pub?gid=1126660257&single=true&output=csv';
+    const UPDATE_INTERVAL = 5 * 60 * 1000;
+
+    let allMics = [];
+    let favorites = []; // This will hold either local or Firestore favorites
+    let currentFilters = {
+        days: [], boroughs: [], times: [], costs: [], signups: [],
+        search: '', showFavorites: false, showOpenMics: false, neighborhoods: [],
+        neighborhoodStyle: 'badge'
+    };
+    
+    // --- Firebase Initialization ---
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let userDocRef; // Reference to the current user's document in Firestore
+
+    // --- DOM Element References ---
+    const micListContainer = document.getElementById('mic-list-container');
+    const searchInput = document.getElementById('search-input');
+    const favoritesToggle = document.getElementById('favorites-toggle');
+    const tonightBtn = document.getElementById('tonight-btn');
+    const resetBtn = document.getElementById('reset-filters');
+    const neighborhoodFilterContainer = document.getElementById('neighborhood-filter-container');
+    const neighborhoodFilterBadge = document.getElementById('neighborhood-filter-badge');
+    const neighborhoodFilterSubway = document.getElementById('neighborhood-filter-subway');
+    const neighborhoodStyleSwitcher = document.getElementById('neighborhood-style-switcher');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const signInBtn = document.getElementById('sign-in-btn');
+    const signOutBtn = document.getElementById('sign-out-btn');
+    const userInfoDiv = document.getElementById('user-info');
+    const userNameSpan = document.getElementById('user-name');
+    const userPhotoImg = document.getElementById('user-photo');
+    const modalBackdrop = document.getElementById('mic-modal-backdrop');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const geolocateBtn = document.getElementById('geolocate-btn');
+
+    let multiSelect = { borough: false, time: false };
+    let userLocation = null;
+    let locationFilterActive = false;
+
+    // --- Core Functions ---
+    
+    function fetchData() {
+        micListContainer.innerHTML = `<div class="status-message">Loading mics...</div>`;
+        loadMicData((mics) => {
+            console.log('[fetchData] Loaded mics:', mics);
+            allMics = mics;
+            render();
+        });
+    }
+
+    function processMics(mics) {
+        const subwayLineMap = { 
+            // Manhattan neighborhoods
+            "Hell's Kitchen": 'line-ACE',
+            'Hells Kitchen': 'line-ACE',
+            'East Village': 'line-L',
+            'Midtown': 'line-123',
+            'Midtown East': 'line-456',
+            'Midtown West': 'line-ACE',
+            'Downtown': 'line-ACE',
+            'Financial District': 'line-ACE',
+            'Greenwich Village': 'line-ACE',
+            'West Village': 'line-123',
+            'UWS': 'line-2',
+            'Upper West Side': 'line-2',
+            'Harlem': 'line-3',
+            'East Harlem': 'line-456',
+            'Theatre District': 'line-ACE',
+            'Gramercy': 'line-456',
+            'Gramercy Park': 'line-456',
+            'Upper East Side': 'line-456',
+            'UES': 'line-456',
+            'Union Square': 'line-NQRW',
+            'SoHo': 'line-456',
+            'LES': 'line-JZ',
+            'Lower East Side': 'line-JZ',
+            'lower east side': 'line-JZ',
+            'Chelsea': 'line-ACE',
+            'Tribeca': 'line-ACE',
+            'Chinatown': 'line-JZ',
+            'NoHo': 'line-BDFM',
+            'Nolita': 'line-BDFM',
+            'Murray Hill': 'line-456',
+            'Flatiron': 'line-NQRW',
+            'Kips Bay': 'line-456',
+            
+            // Brooklyn neighborhoods
+            'Downtown Brooklyn': 'line-BDFM',
+            'Park Slope': 'line-BDFM',
+            'South Slope': 'line-BDFM',
+            'Gowanus': 'line-BDFM',
+            'Williamsburg': 'line-L',
+            'East Williamsburg': 'line-L',
+            'E Williamsburg': 'line-L',
+            'E. Williamsburg': 'line-L',
+            'Bushwick': 'line-L',
+            'Crown Heights': 'line-5',
+            'Bed-Stuy': 'line-JZ',
+            'Bedford Stuyvesant': 'line-JZ',
+            'Bedford-Stuyvesant': 'line-JZ',
+            'Prospect Heights': 'line-BDFM',
+            'Fort Greene': 'line-BDFM',
+            'Clinton Hill': 'line-G',
+            'DUMBO': 'line-ACE',
+            'Brooklyn Heights': 'line-BDFM',
+            'Cobble Hill': 'line-BDFM',
+            'Carroll Gardens': 'line-BDFM',
+            'Red Hook': 'line-BDFM',
+            'Boerum Hill': 'line-BDFM',
+            'Greenwood': 'line-NQRW',
+            
+            // Queens neighborhoods
+            'Astoria': 'line-NQRW',
+            'Long Island City': 'line-7',
+            'LIC': 'line-7',
+            'Sunnyside': 'line-7',
+            'Ridgewood': 'line-BDFM',
+            'Forest Hills': 'line-BDFM',
+            'Jackson Heights': 'line-7',
+            'Woodside': 'line-7',
+            
+            // Bronx neighborhoods
+            'South Bronx': 'line-456',
+            'Mott Haven': 'line-456',
+            'Fordham': 'line-BDFM',
+            'Riverdale': 'line-123',
+            'Inwood': 'line-ACE',
+            
+            // Other areas
+            'Hoboken': 'line-G',
+            'Jersey City': 'line-G',
+            'Journal Square': 'line-G'
+        };
+
+        // Add a preprocessing step to standardize neighborhood names
+        function standardizeNeighborhoodName(name) {
+            if (!name) return name;
+            name = name.trim();
+            
+            // Convert to lowercase for comparison
+            const lowerName = name.toLowerCase();
+            
+            // Standardize Williamsburg variations
+            if (lowerName.includes('williamsburg')) {
+                if (lowerName.startsWith('east') || lowerName.startsWith('e.') || lowerName.startsWith('e ')) {
+                    return 'East Williamsburg';
+                }
+                return 'Williamsburg';
+            }
+            
+            // Standardize Lower East Side variations
+            if (lowerName.includes('lower east') || lowerName === 'les') {
+                return 'LES';
+            }
+            
+            // For all other cases, return the original name
+            return name;
+        }
+
+        return mics.map(mic => {
+            const uniqueId = mic['unique identifier'] || `${mic.Day}-${mic['Start Time']}-${mic['Venue Name']}`;
+            const standardizedNeighborhood = standardizeNeighborhoodName(mic.Neighborhood?.trim());
+            return {
+                id: uniqueId.trim(),
+                day: mic.Day?.trim(),
+                borough: mic.Borough?.trim(),
+                neighborhood: standardizedNeighborhood,
+                venue: mic['Venue Name']?.trim(),
+                time: mic['Start Time']?.trim(),
+                cost: mic.Cost?.trim().toLowerCase() || '',
+                signup: mic['Sign-Up Instructions']?.trim() || '',
+                host: mic['Host(s) / Organizer']?.trim(),
+                description: mic.Description?.trim(),
+                notes: mic.Notes?.trim(),
+                startMinutes: timeToMinutes(mic['Start Time']?.trim()),
+                subwayLine: subwayLineMap[standardizedNeighborhood] || 'line-123'
+            };
+        }).filter(mic => mic.day && mic.time && mic.venue);
+    }
+    
+    function applyFilters() {
+        let filteredMics = allMics.filter(mic => {
+            if (locationFilterActive && userLocation && mic.lat && mic.lon) {
+                const dist = getDistanceMiles(userLocation.lat, userLocation.lon, mic.lat, mic.lon);
+                if (dist > 2) return false;
+            } else if (locationFilterActive) {
+                return false;
+            }
+            if (currentFilters.showFavorites && !favorites.includes(mic.id)) return false;
+            if (currentFilters.days.length > 0 && !currentFilters.days.includes(mic.day)) return false;
+            if (currentFilters.boroughs.length > 0 && !currentFilters.boroughs.includes(mic.borough)) return false;
+            if (currentFilters.times.length > 0) {
+                const isMatch = currentFilters.times.some(t => {
+                    if (t === 'afternoon') return mic.startMinutes >= 720 && mic.startMinutes < 1020;
+                    if (t === 'evening') return mic.startMinutes >= 1020 && mic.startMinutes < 1260;
+                    if (t === 'late') return mic.startMinutes >= 1260;
+                    return false;
+                });
+                if (!isMatch) return false;
+            }
+            if (currentFilters.costs.length > 0) {
+                 const isMatch = currentFilters.costs.some(c => {
+                    if (c === 'free') return mic.cost.includes('free');
+                    if (c === 'paid') return mic.cost.includes('$');
+                    if (c === 'item') return mic.cost.includes('item') || mic.cost.includes('drink');
+                    return false;
+                 });
+                 if (!isMatch) return false;
+            }
+            if (currentFilters.signups.length > 0) {
+                const isMatch = currentFilters.signups.some(s => {
+                    if (s === 'online') return mic.signup.toLowerCase().includes('http') || mic.signup.toLowerCase().includes('www') || mic.signup.toLowerCase().includes('.com') || mic.signup.toLowerCase().includes('email');
+                    if (s === 'in-person') return mic.signup.toLowerCase().includes('in person') || mic.signup.toLowerCase().includes('list');
+                    return false;
+                });
+                if (!isMatch) return false;
+            }
+            if (currentFilters.search) {
+                const searchTerm = currentFilters.search.toLowerCase();
+                if (!(mic.venue.toLowerCase().includes(searchTerm) || (mic.host && mic.host.toLowerCase().includes(searchTerm)) || mic.neighborhood.toLowerCase().includes(searchTerm))) return false;
+            }
+            return true;
+        });
+        const micsForNeighborhoodDisplay = [...filteredMics];
+        if (currentFilters.neighborhoods.length > 0) {
+            filteredMics = filteredMics.filter(mic => currentFilters.neighborhoods.includes(mic.neighborhood));
+        }
+        return {
+            finalMics: filteredMics.sort((a, b) => a.startMinutes - b.startMinutes),
+            availableNeighborhoodMics: micsForNeighborhoodDisplay
+        };
+    }
+
+    // Helper function to get border color based on cost
+    function getBorderColor(cost) {
+        if (!cost) return 'var(--border-color)';
+        const c = cost.toLowerCase();
+        if (c.includes('free')) return 'var(--green)';
+        if (c.includes('item') || c.includes('drink')) return 'var(--yellow)';
+        if (c.includes('$')) return 'var(--purple)';
+        return 'var(--border-color)';
+    }
+
+    function render() {
+        console.log('[render] allMics:', allMics);
+        updateActiveButtons();
+        updateURLWithFilters();
+        const { finalMics, availableNeighborhoodMics } = applyFilters();
+        console.log('[render] finalMics:', finalMics);
+        console.log('[render] availableNeighborhoodMics:', availableNeighborhoodMics);
+        renderNeighborhoodFilters(availableNeighborhoodMics);
+        if (finalMics.length === 0) {
+            micListContainer.innerHTML = `<div class="status-message">No mics found matching your criteria.</div>`;
+            return;
+        }
+
+        // Get current time in minutes since midnight
+        const now = new Date();
+        const currentDay = now.toLocaleString('en-us', { weekday: 'long' });
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const oneHourAgo = currentMinutes - 60;
+
+        // Sort neighborhoods based on the order in currentFilters.neighborhoods
+        const micsByNeighborhood = finalMics.reduce((acc, mic) => {
+            const key = mic.neighborhood || 'Other';
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(mic);
+            return acc;
+        }, {});
+        
+        // Create ordered list of neighborhoods based on filter order
+        let neighborhoodOrder = [...currentFilters.neighborhoods];
+        // Add any remaining neighborhoods that aren't in the filters
+        Object.keys(micsByNeighborhood).forEach(hood => {
+            if (!neighborhoodOrder.includes(hood)) {
+                neighborhoodOrder.push(hood);
+            }
+        });
+        
+        let html = '';
+        neighborhoodOrder.forEach(neighborhood => {
+            if (micsByNeighborhood[neighborhood]) {
+                html += `<div class="neighborhood-group"><h2>${neighborhood}</h2>`;
+                
+                // For current day, split mics into upcoming and earlier
+                if (currentFilters.days.includes(currentDay)) {
+                    const upcomingMics = micsByNeighborhood[neighborhood]
+                        .filter(mic => mic.day === currentDay && mic.startMinutes >= oneHourAgo)
+                        .sort((a, b) => a.startMinutes - b.startMinutes);
+                    
+                    const earlierMics = micsByNeighborhood[neighborhood]
+                        .filter(mic => mic.day === currentDay && mic.startMinutes < oneHourAgo)
+                        .sort((a, b) => a.startMinutes - b.startMinutes);
+
+                    // Render upcoming mics
+                    upcomingMics.forEach(mic => {
+                        html += renderMicCard(mic);
+                    });
+
+                    // Add separator and earlier mics if any exist
+                    if (earlierMics.length > 0) {
+                        html += `<div class="earlier-mics-separator">Mics Earlier Today</div>`;
+                        earlierMics.forEach(mic => {
+                            html += renderMicCard(mic);
+                        });
+                    }
+
+                    // Add mics from other days
+                    const otherDaysMics = micsByNeighborhood[neighborhood]
+                        .filter(mic => mic.day !== currentDay)
+                        .sort((a, b) => a.startMinutes - b.startMinutes);
+                    
+                    otherDaysMics.forEach(mic => {
+                        html += renderMicCard(mic);
+                    });
+                } else {
+                    // For non-current days, just sort by time
+                    const sortedMics = micsByNeighborhood[neighborhood]
+                        .sort((a, b) => a.startMinutes - b.startMinutes);
+                    
+                    sortedMics.forEach(mic => {
+                        html += renderMicCard(mic);
+                    });
+                }
+                
+                html += `</div>`;
+            }
+        });
+        
+        micListContainer.innerHTML = html;
+    }
+
+    function renderMicCard(mic) {
+        const isFavorite = favorites.includes(mic.id);
+        return `<div class="mic-card" data-mic-id="${mic.id}" style="border-left-color: ${getBorderColor(mic.cost)};">
+                <div class="time">${mic.time}</div>
+                <div class="details">
+                    <div class="venue">${mic.venue}</div>
+                    <div class="meta">
+                        Cost: ${mic.cost || 'N/A'} | Sign-up: ${getSimplifiedSignup(mic.signup)} | Host: ${linkifyInstagramHandles(mic.host) || 'N/A'}
+                    </div>
+                </div>
+                <i class="${isFavorite ? 'fa-solid' : 'fa-regular'} fa-star favorite ${isFavorite ? 'active' : ''}" data-mic-id="${mic.id}"></i>
+             </div>`;
+    }
+    
+    // --- Authentication & Favorites ---
+
+    auth.onAuthStateChanged(user => {
+        updateUserUI(user);
+        if (user) {
+            userDocRef = db.collection('users').doc(user.uid);
+            loadFavoritesFromFirestore();
+        } else {
+            userDocRef = null;
+            loadFavoritesFromLocalStorage();
+        }
+        fetchData();
+    });
+
+    function updateUserUI(user) {
+        if (user) {
+            userInfoDiv.classList.remove('hidden');
+            signInBtn.classList.add('hidden');
+            userNameSpan.textContent = user.displayName;
+            userPhotoImg.src = user.photoURL;
+        } else {
+            userInfoDiv.classList.add('hidden');
+            signInBtn.classList.remove('hidden');
+        }
+    }
+
+    async function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await auth.signInWithPopup(provider);
+            // One-time merge of local favorites to Firestore on first sign-in
+            const localFavorites = JSON.parse(localStorage.getItem('micFinderFavorites') || '[]');
+            if (localFavorites.length > 0 && auth.currentUser) {
+                const userRef = db.collection('users').doc(auth.currentUser.uid);
+                await userRef.set({ favorites: firebase.firestore.FieldValue.arrayUnion(...localFavorites) }, { merge: true });
+                localStorage.removeItem('micFinderFavorites');
+            }
+        } catch (error) {
+            console.error("Google Sign-In Error:", error);
+        }
+    }
+
+    function signOut() {
+        auth.signOut();
+    }
+
+    function loadFavoritesFromLocalStorage() {
+        favorites = JSON.parse(localStorage.getItem('micFinderFavorites') || '[]');
+    }
+
+    function saveFavoritesToLocalStorage() {
+        localStorage.setItem('micFinderFavorites', JSON.stringify(favorites));
+    }
+    
+    async function loadFavoritesFromFirestore() {
+        if (!userDocRef) return;
+        try {
+            const doc = await userDocRef.get();
+            if (doc.exists) {
+                favorites = doc.data().favorites || [];
+            } else {
+                favorites = [];
+            }
+            render();
+        } catch (error) {
+            console.error("Error loading favorites from Firestore:", error);
+            loadFavoritesFromLocalStorage(); // Fallback to local
+        }
+    }
+
+    async function toggleFavorite(micId, starElement) {
+        starElement.classList.add('saving'); // Add animation
+        const isCurrentlyFavorite = favorites.includes(micId);
+
+        if (auth.currentUser) { // Firestore logic
+            const updateAction = isCurrentlyFavorite ?
+                firebase.firestore.FieldValue.arrayRemove(micId) :
+                firebase.firestore.FieldValue.arrayUnion(micId);
+            try {
+                await userDocRef.set({ favorites: updateAction }, { merge: true });
+            } catch (error) {
+                console.error("Error updating Firestore favorites:", error);
+                starElement.classList.remove('saving'); // Stop animation on error
+                return; // Early exit
+            }
+        }
+        
+        // Update local state for both logged-in and local users
+        const index = favorites.indexOf(micId);
+        if (index > -1) {
+            favorites.splice(index, 1);
+        } else {
+            favorites.push(micId);
+        }
+
+        if (!auth.currentUser) { // Save to localStorage if not logged in
+            saveFavoritesToLocalStorage();
+        }
+
+        // UI update
+        setTimeout(() => starElement.classList.remove('saving'), 300); // Remove animation after it plays
+        if (currentFilters.showFavorites) {
+            render();
+        } else {
+            starElement.classList.toggle('active');
+            starElement.classList.toggle('fa-solid');
+            starElement.classList.toggle('fa-regular');
+        }
+    }
+    
+    // --- Sharable URL Functions ---
+
+    function updateURLWithFilters() {
+        try {
+            const params = new URLSearchParams();
+            Object.entries(currentFilters).forEach(([key, value]) => {
+                if (Array.isArray(value) && value.length > 0) {
+                    params.set(key, value.join(','));
+                } else if (typeof value === 'string' && value) {
+                    params.set(key, value);
+                } else if (typeof value === 'boolean' && value) {
+                    params.set(key, 'true');
+                }
+            });
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            // Use replaceState to avoid cluttering browser history on every filter change
+            history.replaceState(null, '', newUrl);
+        } catch (error) {
+            // This will fail in sandboxed environments like the one causing the error.
+            // By catching the error, we allow the rest of the app to function.
+            console.warn("Could not update URL. This feature may be disabled in the current environment.", error);
+        }
+    }
+    
+    function applyFiltersFromURL() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            currentFilters.days = params.get('days')?.split(',').filter(Boolean) || [];
+            currentFilters.boroughs = params.get('boroughs')?.split(',').filter(Boolean) || [];
+            currentFilters.times = params.get('times')?.split(',').filter(Boolean) || [];
+            currentFilters.costs = params.get('costs')?.split(',').filter(Boolean) || [];
+            currentFilters.signups = params.get('signups')?.split(',').filter(Boolean) || [];
+            currentFilters.neighborhoods = params.get('neighborhoods')?.split(',').filter(Boolean) || [];
+            currentFilters.search = params.get('search') || '';
+            currentFilters.showFavorites = params.get('showFavorites') === 'true';
+            currentFilters.showOpenMics = params.get('showOpenMics') === 'true';
+
+            // Update multi-select toggles based on loaded filters
+            multiSelect.borough = currentFilters.boroughs.length > 1;
+            document.getElementById('borough-multi-switch').checked = multiSelect.borough;
+            multiSelect.time = currentFilters.times.length > 1;
+            document.getElementById('time-multi-switch').checked = multiSelect.time;
+            
+            // Update toggle UI
+            favoritesToggle.classList.toggle('fa-toggle-on', currentFilters.showFavorites);
+            favoritesToggle.classList.toggle('fa-toggle-off', !currentFilters.showFavorites);
+        } catch (error) {
+             console.warn("Could not apply filters from URL. This feature may be disabled in the current environment.", error);
+        }
+    }
+    
+    // --- Modal Functions ---
+
+    function showMicDetails(micId) {
+        const mic = allMics.find(m => m.id === micId);
+        if (!mic) return;
+
+        // Set the venue name in the header
+        document.getElementById('modal-venue-name').textContent = mic.venue;
+        
+        // Build the modal body content
+        const modalBody = document.querySelector('.modal-body');
+        let html = '';
+            
+        // Only add host section if there is a host
+        if (mic.host && mic.host.trim() !== '') {
+            html += `
+            <div class="detail-item">
+                <strong>Host(s)</strong>
+                <span>${linkifyInstagramHandles(mic.host)}</span>
+            </div>`;
+        }
+            
+        // Only add description if it exists
+        if (mic.description && mic.description.trim() !== '') {
+            html += `
+            <div class="detail-item">
+                <strong>Description</strong>
+                <p>${mic.description}</p>
+            </div>`;
+        }
+
+        // Only add signup if it exists
+        if (mic.signup && mic.signup.trim() !== '') {
+            const signupContent = mic.signup.startsWith('http') ? 
+                `<a href="${mic.signup}" target="_blank" rel="noopener noreferrer" class="signup-link">Sign Up Online</a>` :
+                mic.signup;
+            
+            html += `
+            <div class="detail-item">
+                <strong>Sign-up Instructions</strong>
+                <span>${signupContent}</span>
+            </div>`;
+        }
+
+        // Only add notes if they exist
+        if (mic.notes && mic.notes.trim() !== '') {
+            html += `
+            <div class="detail-item">
+                <strong>Notes (Set Length, Rules, etc.)</strong>
+                <p>${mic.notes}</p>
+            </div>`;
+        }
+        
+        // If no content was added, show a message
+        if (!html) {
+            html = '<div class="detail-item"><p>No additional information available.</p></div>';
+        }
+        
+        modalBody.innerHTML = html;
+        modalBackdrop.classList.add('visible');
+    }
+
+    function closeMicDetails() {
+        modalBackdrop.classList.remove('visible');
+    }
+
+    // --- Helper & UI Functions ---
+
+    function updateActiveButtons() {
+        document.querySelectorAll('.filter-options .filter-btn').forEach(btn => {
+            const filterKey = btn.parentElement.id.split('-')[0] + 's'; // e.g., 'days'
+            const value = btn.dataset.value;
+            if (currentFilters[filterKey] && currentFilters[filterKey].includes(value)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        if (searchInput) searchInput.value = currentFilters.search;
+    }
+    
+    function timeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return null;
+        let [_, hours, minutes, period] = match;
+        hours = parseInt(hours, 10); minutes = parseInt(minutes, 10);
+        if (period.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+        if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+    }
+
+    function getSimplifiedSignup(signupText) {
+        if (!signupText) return 'N/A';
+        const s = signupText.toLowerCase();
+        
+        // Check for URLs with various formats
+        if (s.startsWith('http') || s.startsWith('www') || s.includes('.com') || s.includes('.co') || s.includes('.org') || s.includes('.net')) {
+            // Ensure URL is properly formatted
+            let url = signupText;
+            if (!url.startsWith('http')) {
+                url = 'https://' + (url.startsWith('www.') ? '' : '') + url;
+            }
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: none;">Link</a>`;
+        }
+        // Handle Instagram handles but not emails
+        return linkifyInstagramHandles(signupText);
+    }
+    
+    function renderNeighborhoodFilters(mics) {
+        console.log('[renderNeighborhoodFilters] mics:', mics);
+        const neighborhoodCounts = mics.reduce((acc, mic) => {
+            if (mic.neighborhood) acc[mic.neighborhood] = (acc[mic.neighborhood] || 0) + 1;
+            return acc;
+        }, {});
+        const uniqueNeighborhoods = Object.keys(neighborhoodCounts).sort((a,b) => neighborhoodCounts[b] - neighborhoodCounts[a]);
+        console.log('[renderNeighborhoodFilters] uniqueNeighborhoods:', uniqueNeighborhoods);
+        if (uniqueNeighborhoods.length <= 1) {
+            neighborhoodFilterContainer.style.display = 'none';
+            return;
+        }
+        neighborhoodFilterContainer.style.display = 'block';
+        let badgeHtml = '', subwayHtml = '';
+        uniqueNeighborhoods.forEach(hood => {
+            const isActive = currentFilters.neighborhoods.includes(hood);
+            const mic = allMics.find(m => m.neighborhood === hood);
+            const count = neighborhoodCounts[hood];
+            badgeHtml += `<div class="badge-style-btn filter-btn ${isActive ? 'active' : ''}" data-value="${hood}">${hood} <span class="mic-count">${count}</span></div>`;
+            if (mic) {
+                subwayHtml += `<div class="subway-style-btn filter-btn ${isActive ? 'active' : ''}" data-value="${hood}"><span class="line ${mic.subwayLine}">${mic.subwayLine.charAt(5)}</span>${hood}</div>`;
+            }
+        });
+        console.log('[renderNeighborhoodFilters] badgeHtml:', badgeHtml);
+        neighborhoodFilterBadge.innerHTML = badgeHtml;
+        neighborhoodFilterSubway.innerHTML = subwayHtml;
+    }
+    
+    // --- Event Listeners ---
+
+    function setupEventListeners() {
+        // Filter Clicks - This logic is now robust due to consistent keys.
+        document.querySelectorAll('.filter-panel .filter-options').forEach(group => {
+            group.addEventListener('click', e => {
+                if (!e.target.matches('.filter-btn')) return;
+                const filterKey = group.id.split('-')[0] + 's';
+                const value = e.target.dataset.value;
+                const isMulti = (filterKey === 'boroughs' && multiSelect.borough) || (filterKey === 'times' && multiSelect.time) || ['days', 'costs', 'signups', 'neighborhoods'].includes(filterKey);
+                
+                const arr = currentFilters[filterKey];
+                const index = arr.indexOf(value);
+                
+                if (isMulti) {
+                    if (index > -1) arr.splice(index, 1);
+                    else arr.push(value);
+                } else {
+                    currentFilters[filterKey] = index > -1 ? [] : [value];
+                }
+                saveFilterState(currentFilters);
+                render();
+            });
+        });
+        
+        // Search Input
+        if (searchInput) searchInput.addEventListener('input', e => { currentFilters.search = e.target.value; saveFilterState(currentFilters); render(); });
+
+        // Toggles & Switches
+        if (favoritesToggle) favoritesToggle.addEventListener('click', () => { currentFilters.showFavorites = !currentFilters.showFavorites; favoritesToggle.classList.toggle('fa-toggle-on', currentFilters.showFavorites); favoritesToggle.classList.toggle('fa-toggle-off', !currentFilters.showFavorites); saveFilterState(currentFilters); render(); });
+        const boroughMultiSwitch = document.getElementById('borough-multi-switch');
+        if (boroughMultiSwitch) boroughMultiSwitch.addEventListener('change', e => { multiSelect.borough = e.target.checked; saveFilterState(currentFilters); render(); });
+        const timeMultiSwitch = document.getElementById('time-multi-switch');
+        if (timeMultiSwitch) timeMultiSwitch.addEventListener('change', e => { multiSelect.time = e.target.checked; saveFilterState(currentFilters); render(); });
+        
+        // Buttons
+        if (tonightBtn) tonightBtn.addEventListener('click', () => { resetFilters(); const todayDay = new Date().toLocaleString('en-us', { weekday: 'long' }); currentFilters.days = [todayDay]; saveFilterState(currentFilters); render(); });
+        if (resetBtn) resetBtn.addEventListener('click', () => { resetFilters(); saveFilterState(currentFilters); render(); });
+        
+        // Auth Buttons
+        if (signInBtn) signInBtn.addEventListener('click', signInWithGoogle);
+        if (signOutBtn) signOutBtn.addEventListener('click', signOut);
+
+        // Mic Card and Favorite Star Click (Delegated)
+        micListContainer.addEventListener('click', e => {
+            const favoriteStar = e.target.closest('.favorite');
+            if (favoriteStar) {
+                toggleFavorite(favoriteStar.dataset.micId, favoriteStar);
+                return;
+            }
+            const micCard = e.target.closest('.mic-card');
+            if (micCard) {
+                showMicDetails(micCard.dataset.micId);
+            }
+        });
+        
+        // Modal Closing
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeMicDetails);
+        if (modalBackdrop) modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeMicDetails(); });
+
+        // Select All button
+        if (selectAllBtn) selectAllBtn.addEventListener('click', () => {
+            const allNeighborhoods = Array.from(document.querySelectorAll('.filter-btn[data-value]')).map(btn => btn.dataset.value);
+            if (currentFilters.neighborhoods.length === allNeighborhoods.length) {
+                currentFilters.neighborhoods = [];
+            } else {
+                currentFilters.neighborhoods = [...allNeighborhoods];
+            }
+            render();
+        });
+
+        // Style switcher (badge/subway view)
+        if (neighborhoodStyleSwitcher) neighborhoodStyleSwitcher.addEventListener('click', e => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            
+            // Update active state of buttons
+            neighborhoodStyleSwitcher.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update view
+            const style = btn.dataset.style;
+            document.getElementById('badge-view').classList.toggle('active', style === 'badge');
+            document.getElementById('subway-view').classList.toggle('active', style === 'subway');
+        });
+
+        // Neighborhood filter clicks (both badge and subway views)
+        ['neighborhood-filter-badge', 'neighborhood-filter-subway'].forEach(id => {
+            const filterGroup = document.getElementById(id);
+            if (filterGroup) {
+                filterGroup.addEventListener('click', e => {
+                    const btn = e.target.closest('.filter-btn');
+                    if (!btn) return;
+                    const value = btn.dataset.value;
+                    const index = currentFilters.neighborhoods.indexOf(value);
+                    if (index > -1) {
+                        currentFilters.neighborhoods.splice(index, 1);
+                    } else {
+                        // Remove the neighborhood if it exists elsewhere in the array
+                        const existingIndex = currentFilters.neighborhoods.indexOf(value);
+                        if (existingIndex > -1) {
+                            currentFilters.neighborhoods.splice(existingIndex, 1);
+                        }
+                        // Add it to the beginning of the array
+                        currentFilters.neighborhoods.unshift(value);
+                    }
+                    render();
+                });
+            }
+        });
+
+        if (geolocateBtn) geolocateBtn.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser.');
+                return;
+            }
+            geolocateBtn.disabled = true;
+            geolocateBtn.textContent = 'Locating...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    };
+                    locationFilterActive = true;
+                    render();
+                    geolocateBtn.textContent = 'Find Mics Near Me';
+                    geolocateBtn.disabled = false;
+                },
+                (err) => {
+                    alert('Could not get your location.');
+                    geolocateBtn.textContent = 'Find Mics Near Me';
+                    geolocateBtn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        });
+    }
+
+    function resetFilters() {
+        const todayDay = new Date().toLocaleString('en-us', { weekday: 'long' });
+        currentFilters = { 
+            days: [todayDay], 
+            boroughs: [], 
+            times: [], 
+            costs: [], 
+            signups: [], 
+            search: '', 
+            showFavorites: false, 
+            showOpenMics: false, 
+            neighborhoods: [], 
+            neighborhoodStyle: currentFilters.neighborhoodStyle 
+        };
+    }
+
+    // --- Initialization ---
+    function init() {
+        resetFilters(); // Always set to current day on load
+        render(); // Ensure UI reflects the current day filter before data loads
+        setupEventListeners();
+        // The rest of the initialization is now handled by the onAuthStateChanged listener
+        // which calls fetchData.
+    }
+
+    loadSidebar(() => {
+        // After sidebar loads, initialize filters from localStorage if present
+        const savedFilters = loadFilterState();
+        if (savedFilters) {
+            Object.assign(currentFilters, savedFilters);
+        }
+        setupEventListeners();
+        render();
+        // ... rest of your initialization ...
+    });
+});
+
+// Helper to linkify Instagram handles
+function linkifyInstagramHandles(text) {
+    if (!text) return '';
+    // Skip if it's an email address
+    if (text.includes('@') && text.includes('.com') && !text.includes('instagram.com')) {
+        return text;
+    }
+    // First handle full Instagram URLs
+    text = text.replace(/(https?:\/\/(?:www\.)?instagram\.com\/[a-zA-Z0-9_\.]+)/g, (match) => {
+        const username = match.split('/').pop().replace(/[_\.]$/, '');
+        return `<a href="${match}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: none;">@${username}</a>`;
+    });
+    // Then handle @mentions, but only if they're Instagram handles (not email addresses)
+    return text.replace(/@([a-zA-Z0-9_\.]+)(?![\w\.])/g, (match, username) => {
+        // Skip if this looks like part of an email address
+        if (text.includes(match + '@') || text.includes('@' + username + '.')) {
+            return match;
+        }
+        return `<a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: none;">${match}</a>`;
+    });
+}
+</script>
+</body>
+</html>

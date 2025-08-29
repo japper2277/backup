@@ -1,0 +1,214 @@
+<aside class="filter-panel w-full" id="shared-sidebar">
+    <!-- Admin Panel (hidden by default) -->
+    <div id="admin-panel" class="hidden p-4 border-b border-gray-200 bg-indigo-50">
+        <h3 class="text-lg font-bold text-gray-800 mb-3">Admin Tools</h3>
+        <button id="add-mic-btn" class="w-full mb-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+            Add New Mic
+        </button>
+        <button id="logout-btn" class="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            Logout
+        </button>
+    </div>
+
+    <!-- Mobile Close Button -->
+    <button class="mobile-header-btn mobile-only" id="mobile-filter-close" title="Close" style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
+        <i class="fa-solid fa-times"></i>
+    </button>
+
+    <!-- Prominent Search Bar -->
+    <div class="search-section w-full">
+        <div class="search-container w-full">
+            <i class="fa-solid fa-search search-icon"></i>
+            <input type="search" placeholder="Search by venue or host..." class="search-input w-full" id="search-input" style="width:100%;">
+        </div>
+    </div>
+
+    <!-- Day Filter - Segmented Control at Top -->
+    <div class="filter-section day-section w-full" style="width:100%;">
+        <div class="section-header">
+            <h3><i class="fa-solid fa-calendar-day fa-fw"></i> Day of Week</h3>
+        </div>
+        <div class="segmented-control w-full" id="day-filter" style="width:100%;">
+            <button class="segment-btn" data-value="Monday">Mon</button>
+            <button class="segment-btn" data-value="Tuesday">Tue</button>
+            <button class="segment-btn" data-value="Wednesday">Wed</button>
+            <button class="segment-btn" data-value="Thursday">Thu</button>
+            <button class="segment-btn" data-value="Friday">Fri</button>
+            <button class="segment-btn" data-value="Saturday">Sat</button>
+            <button class="segment-btn" data-value="Sunday">Sun</button>
+        </div>
+    </div>
+
+    <!-- Time & Day Section -->
+    <div class="filter-section collapsible-section w-full" style="width:100%;">
+        <div class="section-header collapsible-header" data-target="time-day-content">
+            <h3><i class="fa-solid fa-clock fa-fw"></i> Time & Schedule</h3>
+            <i class="fa-solid fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="section-content w-full" id="time-day-content" style="width:100%;">
+            <div class="time-range-container">
+                <div class="time-inputs">
+                    <div class="time-input-group">
+                        <label for="custom-time-start-hour">From</label>
+                        <div class="time-select-group">
+                            <select id="custom-time-start-hour" class="time-select">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                            <span>:</span>
+                            <select id="custom-time-start-minute" class="time-select">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                            <select id="custom-time-start-ampm" class="time-select">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="time-input-group">
+                        <label for="custom-time-end-hour">To</label>
+                        <div class="time-select-group">
+                            <select id="custom-time-end-hour" class="time-select">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                            <span>:</span>
+                            <select id="custom-time-end-minute" class="time-select">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                            <select id="custom-time-end-ampm" class="time-select">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="time-clear-container" style="margin-top: 0.75rem;">
+                    <button type="button" id="clear-time-filter" class="clear-time-btn" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.375rem 0.75rem;
+                        background-color: #f3f4f6;
+                        color: #374151;
+                        border: 1px solid #d1d5db;
+                        border-radius: 0.375rem;
+                        font-size: 0.875rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    " onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
+                        <i class="fa-solid fa-times" style="font-size: 0.75rem;"></i>
+                        Clear Time Filter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Section -->
+    <div class="filter-section collapsible-section w-full" style="width:100%;">
+        <div class="section-header collapsible-header" data-target="location-content">
+            <h3><i class="fa-solid fa-map-pin fa-fw"></i> Location</h3>
+            <i class="fa-solid fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="section-content w-full" id="location-content" style="width:100%;">
+            <div class="checkbox-group w-full" style="width:100%;">
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="Manhattan" data-filter="borough">
+                    <span class="checkmark"></span>
+                    Manhattan
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="Brooklyn" data-filter="borough">
+                    <span class="checkmark"></span>
+                    Brooklyn
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="Queens" data-filter="borough">
+                    <span class="checkmark"></span>
+                    Queens
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="filter-section collapsible-section w-full" style="width:100%;">
+        <div class="section-header collapsible-header" data-target="details-content">
+            <h3><i class="fa-solid fa-info-circle fa-fw"></i> Details</h3>
+            <i class="fa-solid fa-chevron-down collapse-icon"></i>
+        </div>
+        <div class="section-content w-full" id="details-content" style="width:100%;">
+            <div class="checkbox-group w-full" style="width:100%;">
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="free" data-filter="cost">
+                    <span class="checkmark"></span>
+                    Free
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="paid" data-filter="cost">
+                    <span class="checkmark"></span>
+                    Paid
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="item" data-filter="cost">
+                    <span class="checkmark"></span>
+                    1 Item Min
+                </label>
+            </div>
+            <div class="checkbox-group w-full" style="width:100%;">
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="in-person" data-filter="signup">
+                    <span class="checkmark"></span>
+                    In Person Sign-up
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" data-value="online" data-filter="signup">
+                    <span class="checkmark"></span>
+                    Online Sign-up
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Toggle -->
+    <div class="filter-section w-full" style="width:100%;">
+        <div class="toggle-switch w-full" style="width:100%;">
+            <h3><i class="fa-solid fa-star fa-fw"></i> Show Favorites Only</h3>
+            <i class="fa-solid fa-toggle-off toggle-icon" id="favorites-toggle"></i>
+        </div>
+    </div>
+
+    <!-- Reset Button -->
+    <div class="filter-section w-full" style="width:100%;">
+        <button class="filter-btn reset-btn w-full" id="reset-filters" style="width:100%;">
+            <i class="fa-solid fa-rotate-left fa-fw"></i> Reset All Filters
+        </button>
+    </div>
+</aside> 

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile.js Test</title>
+    <script src="js/utils.js"></script>
+    <script src="js/mobile.js"></script>
+</head>
+<body>
+    <div id="test-results"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.getElementById('test-results');
+            
+            // Test mobile detection
+            const isMobile = window.MicFinderUtils ? window.MicFinderUtils.isMobileDevice() : 'Utils not loaded';
+            results.innerHTML += '<p>Mobile Detection: ' + isMobile + '</p>';
+            
+            // Test if MicFinderMobile was exported
+            const mobileModule = window.MicFinderMobile ? 'Loaded' : 'Not loaded';
+            results.innerHTML += '<p>Mobile Module: ' + mobileModule + '</p>';
+            
+            // Test mobile functions
+            if (window.MicFinderMobile) {
+                results.innerHTML += '<p>isMobileMode(): ' + window.MicFinderMobile.isMobileMode() + '</p>';
+                results.innerHTML += '<p>getCurrentMobileView(): ' + window.MicFinderMobile.getCurrentMobileView() + '</p>';
+            }
+            
+            console.log('Mobile test completed');
+        });
+    </script>
+</body>
+</html>

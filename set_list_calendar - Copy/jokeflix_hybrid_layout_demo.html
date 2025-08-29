@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JokeFlix + Hybrid Hover - Layout Demo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #121212;
+            --bg-surface: #181818;
+            --bg-surface-2: #282828;
+            --bg-input: #2a2d3e;
+            --border-color: #3e4042;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-green: #1DB954;
+            --accent-blue: #45a3ff;
+            --accent-orange: #f5c518;
+            --accent-purple: #9d6cff;
+            --status-idea: #808080;
+            --status-workshopping: #f5c518;
+            --status-tight5: #45a3ff;
+            --status-showready: #1DB954;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary); 
+            margin: 0; 
+            padding: 2rem; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+
+        .demo-container { 
+            max-width: 500px; 
+            width: 100%; 
+            background: var(--bg-surface); 
+            padding: 1rem; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        h1 { 
+            margin: 0; 
+            color: var(--accent-green); 
+            font-size: 1.5rem;
+        }
+        .current-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* VIEW TOGGLE (JokeFlix feature) */
+        .view-toggle { 
+            display: flex; 
+            background: var(--bg-surface-2); 
+            border-radius: 8px; 
+            padding: 4px; 
+            margin: 0 0 1rem 0; 
+        }
+        .view-toggle-btn { 
+            flex: 1; 
+            text-align: center; 
+            padding: 0.5rem; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-secondary); 
+            font-weight: 600; 
+            border-radius: 6px; 
+            cursor: pointer; 
+        }
+        .view-toggle-btn.active { 
+            background: #3a3b3c; 
+            color: var(--text-primary); 
+        }
+
+        /* JOKE BANK PANEL */
+        .joke-bank-panel { 
+            background: var(--bg-main); 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+
+        /* PANEL HEADER - now includes view options button from hybrid hover */
+        .panel-header { 
+            padding: 0.75rem 1rem; 
+            border-bottom: 1px solid var(--border-color); 
+            background: var(--bg-surface-2); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: relative;
+        }
+        .panel-header h4 { 
+            margin: 0; 
+            font-size: 0.9rem; 
+            color: var(--text-primary); 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+        }
+
+        /* NEW: View options button from hybrid hover */
+        .view-options-btn { 
+            background: none; 
+            border: none; 
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            font-size: 1rem; 
+            padding: 0.25rem; 
+        }
+        .view-options-popover {
+            position: absolute; 
+            top: 100%; 
+            right: 0.5rem; 
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            padding: 1rem; 
+            z-index: 100; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform-origin: top right;
+            transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+            transform: scale(0.9);
+            opacity: 0;
+            display: block;
+            visibility: hidden;
+        }
+        .view-options-popover.visible {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .lock-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            margin-bottom: 0.5rem; 
+        }
+        .lock-group label { 
+            margin: 0; 
+            font-weight: normal; 
+            font-size: 0.9rem; 
+        }
+
+        /* SEARCH BAR (JokeFlix feature) */
+        .panel-actions { 
+            padding: 0.5rem 1rem; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .panel-actions input { 
+            width: 100%; 
+            background: var(--bg-input); 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            padding: 0.75rem; 
+            color: var(--text-primary); 
+            font-size: 0.95rem; 
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .search-hint { 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+            padding: 0.25rem 1rem 0.5rem 1rem; 
+        }
+
+        /* FILTER BAR (JokeFlix feature) */
+        .filter-bar { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 0.5rem; 
+            padding: 0.5rem 1rem; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .filter-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.25rem; 
+        }
+        .filter-group label { 
+            font-size: 0.7rem; 
+            color: var(--text-secondary); 
+        }
+        .filter-bar select { 
+            width: 100%; 
+            background-color: var(--bg-surface-2); 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            color: var(--text-primary); 
+            font-size: 0.8rem; 
+            padding: 0.25rem; 
+        }
+
+        /* JOKE BANK LIST */
+        .joke-bank-list { 
+            height: 450px; 
+            overflow-y: auto; 
+            padding: 0.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.5rem;
+        }
+
+        /* JOKE CARDS - hybrid hover system */
+        .joke-bank-item { 
+            background: var(--bg-surface-2); 
+            border-radius: 6px; 
+            padding: 0.75rem; 
+            transition: background-color 0.2s ease, transform 0.15s ease-out; 
+            position: relative; 
+            border-left: 3px solid transparent; 
+            cursor: pointer; 
+        }
+        .joke-bank-item:hover { 
+            background-color: var(--bg-surface);
+            transform: scale(1.01);
+        }
+
+        .joke-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-right: 2.5rem;
+        }
+        .joke-title { 
+            font-size: 0.95rem; 
+            font-weight: 600;
+            color: var(--text-primary); 
+            flex: 1;
+            margin-right: 1rem;
+        }
+        .last-performed-compact {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* HYBRID HOVER: Pills fade system */
+        .joke-card-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .pills-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pills-container > * { 
+            opacity: 0; 
+            transition: opacity 0.2s ease-in-out; 
+        }
+        .joke-bank-item:hover .pills-container > * { 
+            opacity: 1; 
+        }
+        /* Lock states from hybrid hover */
+        .left-locked .pills-container .left-meta { 
+            opacity: 1; 
+        }
+        .right-locked .pills-container .right-meta { 
+            opacity: 1; 
+        }
+
+        /* METADATA STYLING */
+        .left-meta, .right-meta { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+        }
+        .left-meta {
+            gap: 0.5rem;
+        }
+        .right-meta {
+            gap: 0.5rem;
+        }
+
+        .metadata-pill { 
+            padding: 0.125rem 0.6rem; 
+            border-radius: 12px; 
+            font-size: 0.7rem; 
+            font-weight: 600; 
+            color: white; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.3rem; 
+        }
+
+        /* Status pills (left side) */
+        .status-pill { background-color: var(--status-idea); }
+        .status-Workshopping { background-color: var(--status-workshopping); }
+        .status-Tight-5-Ready { background-color: var(--status-tight5); }
+        .status-Show-Ready { background-color: var(--status-showready); }
+
+        /* Type and clean pills (right side) */
+        .type-pill { background-color: var(--accent-blue); }
+        .clean-pill { background-color: var(--accent-green); }
+
+
+
+        /* Per-joke menu button (from JokeFlix) */
+        .joke-menu-btn { 
+            position: absolute; 
+            bottom: 0.5rem; 
+            right: 0.5rem; 
+            font-size: 0.9rem; 
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            opacity: 0; 
+            transition: all 0.2s; 
+            background: none; 
+            border: none; 
+            padding: 0.25rem;
+            border-radius: 3px;
+        }
+        .joke-bank-item:hover .joke-menu-btn { 
+            opacity: 1; 
+            background: var(--bg-surface);
+        }
+        .joke-menu-btn:hover {
+            background: var(--bg-main) !important;
+            color: var(--text-primary);
+        }
+
+        /* Flash feedback animation from hybrid hover */
+        @keyframes quick-flash {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .flash-feedback {
+            animation: quick-flash 0.3s ease-in-out;
+        }
+
+        /* Demo indicators */
+        .demo-note {
+            background: var(--accent-purple);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header-container">
+            <h1>JokeFlix + Hybrid Hover</h1>
+            <div class="current-date" id="currentDate"></div>
+        </div>
+        <div class="demo-note">Layout Demo - Hover over cards to see metadata fade in</div>
+
+        <!-- VIEW TOGGLE from JokeFlix -->
+        <div class="view-toggle">
+            <button class="view-toggle-btn active">Library</button>
+            <button class="view-toggle-btn">Discovery</button>
+        </div>
+
+        <div class="joke-bank-panel">
+            <!-- ENHANCED PANEL HEADER with view options -->
+            <div class="panel-header">
+                <h4><i class="fas fa-book-open"></i> Your Jokes</h4>
+                <button class="view-options-btn" title="View Options">
+                    <i class="fas fa-cog"></i>
+                </button>
+                
+                <!-- VIEW OPTIONS POPOVER from hybrid hover -->
+                <div class="view-options-popover" id="viewOptionsPopover">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem;">Lock Pill Visibility</label>
+                    <div class="lock-group">
+                        <input type="checkbox" id="lockLeftPill" checked>
+                        <label for="lockLeftPill">Status Pill (Left)</label>
+                    </div>
+                    <div class="lock-group">
+                        <input type="checkbox" id="lockRightPills">
+                        <label for="lockRightPills">Metadata Pills (Right)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEARCH BAR from JokeFlix -->
+            <div class="panel-actions">
+                <input type="search" id="jokeSearch" placeholder="Search your jokes...">
+            </div>
+            <div class="search-hint">Try: "clean story", "new", "opener", or even "clena"</div>
+            
+            <!-- FILTER BAR from JokeFlix -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Sort by</label>
+                    <select id="sortBy">
+                        <option value="title">Title (A-Z)</option>
+                        <option value="lastPerformed">Recently Performed</option>
+                        <option value="status">Readiness Status</option>
+                        <option value="type">Joke Type</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Joke Type</label>
+                    <select id="filterType">
+                        <option value="all">All Types</option>
+                        <option value="One-liner">One-liner</option>
+                        <option value="Story">Story</option>
+                        <option value="Observational">Observational</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- JOKE LIST with hybrid hover -->
+            <div class="joke-bank-list left-locked" id="jokeBankList">
+                <!-- Jokes will be dynamically rendered here -->
+            </div>
+        </div>
+
+        <div class="demo-note">
+            Features: Search + Filters (JokeFlix) + Hybrid Hover System + Lock Controls
+        </div>
+    </div>
+    <!-- Joke Menu -->
+    <div id="jokeMenu" style="display: none; position: absolute; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000;">
+        <button class="context-menu-item" data-action="set-status"><i class="fas fa-traffic-light"></i> Cycle Status</button>
+        <button class="context-menu-item" data-action="edit-joke"><i class="fas fa-pencil-alt"></i> Edit Joke</button>
+        <button class="context-menu-item" data-action="view-history"><i class="fas fa-history"></i> View History</button>
+        <button class="context-menu-item" data-action="duplicate"><i class="fas fa-copy"></i> Duplicate</button>
+        <hr style="border-color: var(--border-color); margin: 0.5rem 0;">
+        <button class="context-menu-item" data-action="archive" style="color: var(--accent-orange);"><i class="fas fa-archive"></i> Archive</button>
+    </div>
+
+    <style>
+        .context-menu-item {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .context-menu-item:hover {
+            background-color: var(--bg-surface-2);
+        }
+        .context-menu-item i {
+            width: 16px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Data store with sample jokes
+        const dataStore = {
+            jokes: [
+                { 
+                    id: 101, 
+                    title: 'Airplane Food Bit', 
+                    text: 'Airplane food joke - why do they call it airplane food when...', 
+                    jokeType: 'Observational', 
+                    readinessStatus: 'Show Ready', 
+                    isClean: true,
+                    lastPerformed: { venue: 'Laugh Factory', date: '2025-08-19' }
+                },
+                { 
+                    id: 102, 
+                    title: 'Coffee Shop Rant', 
+                    text: 'New 5 minutes about coffee shops and the weird...', 
+                    jokeType: 'Story', 
+                    readinessStatus: 'Workshopping', 
+                    isClean: false,
+                    lastPerformed: { venue: 'Comedy Store', date: '2025-08-12' }
+                },
+                { 
+                    id: 103, 
+                    title: 'Lazy Cat Hire', 
+                    text: 'My cat is so lazy, he hired another cat to...', 
+                    jokeType: 'One-liner', 
+                    readinessStatus: 'Tight 5 Ready', 
+                    isClean: true,
+                    lastPerformed: { venue: 'Open Mic Night', date: '2025-08-15' }
+                },
+                { 
+                    id: 104, 
+                    title: 'Self-Driving Cars Premise', 
+                    text: 'A premise about self-driving cars that...', 
+                    jokeType: 'Observational', 
+                    readinessStatus: 'Idea', 
+                    isClean: true,
+                    lastPerformed: null
+                }
+            ],
+            getAllJokes: function() { return this.jokes; },
+            getJokeById: function(id) { return this.jokes.find(j => j.id === id); }
+        };
+
+        // DOM elements
+        const jokeBankEl = document.getElementById('jokeBankList');
+        const viewOptionsBtn = document.querySelector('.view-options-btn');
+        const viewOptionsPopover = document.getElementById('viewOptionsPopover');
+        const lockLeftCheck = document.getElementById('lockLeftPill');
+        const lockRightCheck = document.getElementById('lockRightPills');
+        const searchInput = document.getElementById('jokeSearch');
+        const sortSelect = document.getElementById('sortBy');
+        const filterSelect = document.getElementById('filterType');
+        const jokeMenu = document.getElementById('jokeMenu');
+
+        // State
+        let isLeftLocked = true;
+        let isRightLocked = false;
+        let currentJokes = dataStore.getAllJokes();
+        const READINESS_STAGES = ['Idea', 'Workshopping', 'Tight 5 Ready', 'Show Ready'];
+
+        // Utility functions
+        function closeAllPopups() {
+            viewOptionsPopover.classList.remove('visible');
+            jokeMenu.style.display = 'none';
+        }
+
+        function syncUI() {
+            jokeBankEl.classList.toggle('left-locked', isLeftLocked);
+            jokeBankEl.classList.toggle('right-locked', isRightLocked);
+            lockLeftCheck.checked = isLeftLocked;
+            lockRightCheck.checked = isRightLocked;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'Idea': 'fa-lightbulb',
+                'Workshopping': 'fa-tools',
+                'Tight 5 Ready': 'fa-microphone',
+                'Show Ready': 'fa-star'
+            };
+            return icons[status] || 'fa-lightbulb';
+        }
+
+        function filterAndSortJokes() {
+            let jokes = dataStore.getAllJokes();
+            
+            // Search filter
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                jokes = jokes.filter(joke => 
+                    joke.title.toLowerCase().includes(searchTerm) ||
+                    joke.text.toLowerCase().includes(searchTerm) ||
+                    joke.jokeType.toLowerCase().includes(searchTerm) ||
+                    joke.readinessStatus.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Type filter
+            const filterType = filterSelect.value;
+            if (filterType !== 'all') {
+                jokes = jokes.filter(joke => joke.jokeType === filterType);
+            }
+
+            // Sort
+            const sortBy = sortSelect.value;
+            jokes.sort((a, b) => {
+                switch (sortBy) {
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'lastPerformed':
+                        if (!a.lastPerformed && !b.lastPerformed) return 0;
+                        if (!a.lastPerformed) return 1;
+                        if (!b.lastPerformed) return -1;
+                        return new Date(b.lastPerformed.date) - new Date(a.lastPerformed.date);
+                    case 'status':
+                        return READINESS_STAGES.indexOf(a.readinessStatus) - READINESS_STAGES.indexOf(b.readinessStatus);
+                    case 'type':
+                        return a.jokeType.localeCompare(b.jokeType);
+                    default:
+                        return 0;
+                }
+            });
+
+            currentJokes = jokes;
+            renderJokes();
+        }
+
+        function renderJokes() {
+            jokeBankEl.innerHTML = currentJokes.map(joke => {
+                const statusClass = joke.readinessStatus.replace(/ /g, '-');
+                const statusIcon = getStatusIcon(joke.readinessStatus);
+                
+                const lastPerformedHTML = joke.lastPerformed 
+                    ? `${formatDate(joke.lastPerformed.date)} • ${joke.lastPerformed.venue}`
+                    : '<span style="color: var(--text-secondary); font-style: italic;">Never</span>';
+
+                return `
+                    <div class="joke-bank-item" data-joke-id="${joke.id}">
+                        <button class="joke-menu-btn" title="Joke Actions" data-joke-id="${joke.id}"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="joke-card-header">
+                            <div class="joke-title">${joke.title}</div>
+                            <div class="last-performed-compact">${lastPerformedHTML}</div>
+                        </div>
+                        <div class="joke-card-footer">
+                            <div class="pills-container">
+                                <div class="left-meta">
+                                    <div class="metadata-pill status-pill status-${statusClass}">
+                                        <i class="fas ${statusIcon}"></i>
+                                        <span>${joke.readinessStatus}</span>
+                                    </div>
+                                </div>
+                                <div class="right-meta">
+                                    <div class="metadata-pill type-pill">
+                                        <i class="fas fa-book-open"></i>
+                                        <span>${joke.jokeType}</span>
+                                    </div>
+                                    ${joke.isClean ? '<div class="metadata-pill clean-pill"><i class="fas fa-soap"></i><span>Clean</span></div>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+            
+            syncUI();
+        }
+
+        // Event listeners
+        viewOptionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = viewOptionsPopover.classList.contains('visible');
+            closeAllPopups();
+            if (!isVisible) {
+                viewOptionsPopover.classList.add('visible');
+            }
+        });
+
+        lockLeftCheck.addEventListener('change', () => {
+            isLeftLocked = lockLeftCheck.checked;
+            syncUI();
+            // Flash feedback
+            document.querySelectorAll('.left-meta').forEach(el => {
+                el.classList.add('flash-feedback');
+                el.addEventListener('animationend', () => el.classList.remove('flash-feedback'), { once: true });
+            });
+        });
+
+        lockRightCheck.addEventListener('change', () => {
+            isRightLocked = lockRightCheck.checked;
+            syncUI();
+            // Flash feedback
+            document.querySelectorAll('.right-meta').forEach(el => {
+                el.classList.add('flash-feedback');
+                el.addEventListener('animationend', () => el.classList.remove('flash-feedback'), { once: true });
+            });
+        });
+
+        // Search and filter
+        searchInput.addEventListener('input', filterAndSortJokes);
+        sortSelect.addEventListener('change', filterAndSortJokes);
+        filterSelect.addEventListener('change', filterAndSortJokes);
+
+        // Joke menu handling
+        jokeBankEl.addEventListener('click', (e) => {
+            const menuBtn = e.target.closest('.joke-menu-btn');
+            if (menuBtn) {
+                e.stopPropagation();
+                const jokeId = parseInt(menuBtn.dataset.jokeId);
+                showJokeMenu(menuBtn, jokeId);
+            }
+        });
+
+        function showJokeMenu(button, jokeId) {
+            closeAllPopups();
+            const btnRect = button.getBoundingClientRect();
+            jokeMenu.style.display = 'block';
+            jokeMenu.style.top = `${btnRect.bottom + 5}px`;
+            jokeMenu.style.left = `${btnRect.right - jokeMenu.offsetWidth}px`;
+            jokeMenu.dataset.jokeId = jokeId;
+        }
+
+        jokeMenu.addEventListener('click', (e) => {
+            const action = e.target.closest('.context-menu-item')?.dataset.action;
+            const jokeId = parseInt(jokeMenu.dataset.jokeId);
+            
+            if (!action || !jokeId) return;
+            
+            const joke = dataStore.getJokeById(jokeId);
+            
+            switch (action) {
+                case 'set-status':
+                    const currentIndex = READINESS_STAGES.indexOf(joke.readinessStatus);
+                    const nextIndex = (currentIndex + 1) % READINESS_STAGES.length;
+                    joke.readinessStatus = READINESS_STAGES[nextIndex];
+                    filterAndSortJokes();
+                    break;
+                case 'edit-joke':
+                    alert(`Edit joke: "${joke.title}"`);
+                    break;
+                case 'view-history':
+                    alert(`View history for: "${joke.title}"`);
+                    break;
+                case 'duplicate':
+                    const newJoke = { ...joke, id: Date.now(), title: joke.title + ' (Copy)' };
+                    dataStore.jokes.push(newJoke);
+                    filterAndSortJokes();
+                    break;
+                case 'archive':
+                    if (confirm(`Archive "${joke.title}"?`)) {
+                        dataStore.jokes = dataStore.jokes.filter(j => j.id !== jokeId);
+                        filterAndSortJokes();
+                    }
+                    break;
+            }
+            
+            closeAllPopups();
+        });
+
+        // Close popups on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#viewOptionsPopover') && 
+                !e.target.closest('.view-options-btn') &&
+                !e.target.closest('#jokeMenu') &&
+                !e.target.closest('.joke-menu-btn')) {
+                closeAllPopups();
+            }
+        });
+
+        // Set current date in top right
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric'
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Initial render
+        updateCurrentDate();
+        filterAndSortJokes();
+    });
+    </script>
+</body>
+</html>

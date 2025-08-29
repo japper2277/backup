@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Setlist Builder - React Demo</title>
+    <meta name="description" content="A real-time collaborative joke and setlist management application with Firebase backend">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="mianifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1DB954" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Setlist Builder" />
+    <link rel="apple-touch-icon" href="/vite.svg" />
+    
+    <!-- Optimized Font Loading Strategy -->
+    <!-- Preconnect to font origins for faster DNS resolution -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Properly optimized font loading -->
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" 
+      rel="stylesheet"
+    >
+    
+    <!-- Font Awesome with proper async loading -->
+    <link 
+      rel="preload" 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      as="style" 
+      onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
+    
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            /* Robust font stack with system fallbacks for instant text rendering */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            /* Improve text rendering */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeSpeed;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        #root {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Loading state */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1rem;
+            color: #b3b3b3;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #3e4042;
+            border-top: 3px solid #1DB954;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Demo header */
+        .demo-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1DB954, #45a3ff);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .demo-header a {
+            color: white;
+            text-decoration: underline;
+            margin-left: 0.5rem;
+        }
+        
+        /* Adjust main content for demo header */
+        #root {
+            padding-top: 2.5rem;
+        }
+        
+        /* Error boundary styles */
+        .error-boundary {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .error-boundary h1 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .error-boundary p {
+            color: #b3b3b3;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+        
+        .error-boundary button {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .error-boundary button:hover {
+            background: #1aa34a;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .demo-header {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.5rem;
+            }
+            
+            #root {
+                padding-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo notification bar -->
+    <div class="demo-header">
+        🚀 Collaborative Setlist Builder Demo - Real-time Firebase backend with authentication, sharing & comments
+        <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener">
+            <i class="fas fa-external-link-alt"></i> View Code
+        </a>
+    </div>
+
+    <!-- React app root -->
+    <div id="root">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div>Loading Collaborative Setlist Builder...</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">
+                Initializing Firebase, Authentication & Real-time Features
+            </div>
+            <div style="font-size: 0.7rem; opacity: 0.5; margin-top: 1rem;">
+                🌐 <strong>Production deployment</strong> with Firebase hosting
+            </div>
+        </div>
+    </div>
+
+    <!-- Error handling is now properly managed by React ErrorBoundary components -->
+
+    <!-- Load the React demo -->
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

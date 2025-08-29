@@ -1,0 +1,50 @@
+{
+  "name": "Mic Finder - Comedy Open Mic Locator",
+  "short_name": "Mic Finder",
+  "description": "Find comedy open mics in your area with our interactive map and filtering system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#18191a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Find Nearby Mics",
+      "short_name": "Nearby",
+      "description": "Find comedy mics near your location",
+      "url": "/?action=nearby",
+      "icons": [{ "src": "icons/icon-144x144.png", "sizes": "144x144" }]
+    },
+    {
+      "name": "Today's Mics",
+      "short_name": "Today",
+      "description": "See today's comedy mics",
+      "url": "/?filter=today",
+      "icons": [{ "src": "icons/icon-144x144.png", "sizes": "144x144" }]
+    },
+    {
+      "name": "Favorites",
+      "short_name": "Favorites",
+      "description": "View your favorite comedy mics",
+      "url": "/?view=favorites",
+      "icons": [{ "src": "icons/icon-144x144.png", "sizes": "144x144" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

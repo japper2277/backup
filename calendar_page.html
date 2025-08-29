@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar View - Open Mics</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Helvetica+Neue,sans-serif&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Third-party Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="../js/micDataLoader.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Sidebar Styles and Script -->
+    <link rel="stylesheet" href="sidebar.css">
+    <script src="js/sidebar.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-surface: #242526;
+            --bg-surface-2: #3a3b3c;
+            --border-color: #3e4042;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --accent-blue: #45a3ff;
+            --purple: #9d6cff;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .app-layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .view-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-surface-2);
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+
+        .view-switcher a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-switcher a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .view-switcher a.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .tonight-btn {
+            background: var(--purple);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sign-in-btn {
+            background: var(--purple);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+        <div class="main-container">
+            <header class="header">
+                <div class="header-left">
+                    <div class="view-switcher">
+                        <a href="open_mic_calendar.html"><i class="fa-solid fa-list fa-fw"></i> List</a>
+                        <a href="map_view.html"><i class="fa-solid fa-map-location-dot fa-fw"></i> Map</a>
+                        <a href="calendar_page.html" class="active"><i class="fa-solid fa-calendar fa-fw"></i> Calendar</a>
+                    </div>
+                    <button class="tonight-btn">
+                        <i class="fa-solid fa-bolt-lightning fa-fw"></i>
+                        Tonight's Mics
+                    </button>
+                </div>
+                <button class="sign-in-btn">
+                    <i class="fab fa-google"></i>
+                    Sign In with Google
+                </button>
+            </header>
+            <main class="main-content">
+                <!-- Calendar content will go here -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize sidebar
+        loadSidebar(() => {
+            console.log('Sidebar loaded successfully');
+        });
+    </script>
+</body>
+</html> 

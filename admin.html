@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mic Finder Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Mic Finder Admin Panel</h1>
+        
+        <!-- Update Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Update Controls</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <button id="enable-updates" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    <i class="fa fa-play mr-2"></i>Enable Auto Updates
+                </button>
+                <button id="disable-updates" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    <i class="fa fa-stop mr-2"></i>Disable Auto Updates
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button id="force-update" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fa fa-sync mr-2"></i>Force Update Now
+                </button>
+                <button id="clear-cache" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    <i class="fa fa-trash mr-2"></i>Clear Cache
+                </button>
+            </div>
+        </div>
+        
+        <!-- Status Display -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">System Status</h2>
+            <div id="status-display" class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="font-medium">Auto Updates:</span>
+                    <span id="update-status" class="text-gray-600">Loading...</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium">Last Update:</span>
+                    <span id="last-update" class="text-gray-600">Loading...</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium">Total Mics:</span>
+                    <span id="mic-count" class="text-gray-600">Loading...</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-medium">Backup Available:</span>
+                    <span id="backup-status" class="text-gray-600">Loading...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Backup Management -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Backup Management</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <button id="create-backup" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    <i class="fa fa-save mr-2"></i>Create Backup
+                </button>
+                <button id="restore-backup" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    <i class="fa fa-undo mr-2"></i>Restore from Backup
+                </button>
+            </div>
+            
+            <div id="backup-info" class="text-sm text-gray-600">
+                <!-- Backup information will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Configuration -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Configuration</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Google Sheets URL</label>
+                    <input type="text" id="sheets-url" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                           placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Update Interval (hours)</label>
+                        <input type="number" id="update-interval" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                               value="6" min="1" max="24">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Retries</label>
+                        <input type="number" id="max-retries" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                               value="3" min="1" max="10">
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="validate-data" class="mr-2" checked>
+                        <span class="text-sm">Validate data before applying</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="backup-on-update" class="mr-2" checked>
+                        <span class="text-sm">Create backup before updates</span>
+                    </label>
+                </div>
+                
+                <button id="save-config" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    <i class="fa fa-save mr-2"></i>Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load configuration and status
+        function loadStatus() {
+            const config = window.MicFinderConfig || {};
+            const updater = window.MicFinderSpreadsheetUpdater;
+            
+            // Update status display
+            document.getElementById('update-status').textContent = 
+                config.SPREADSHEET_UPDATE_CONFIG?.enabled ? 'Enabled' : 'Disabled';
+            
+            document.getElementById('mic-count').textContent = 
+                window.MicFinderState?.getAllMics()?.length || 0;
+            
+            // Load configuration values
+            if (config.SPREADSHEET_SOURCES?.main) {
+                document.getElementById('sheets-url').value = config.SPREADSHEET_SOURCES.main.url || '';
+                document.getElementById('update-interval').value = 
+                    Math.round(config.SPREADSHEET_SOURCES.main.updateInterval / (60 * 60 * 1000)) || 6;
+            }
+            
+            if (config.SPREADSHEET_UPDATE_CONFIG) {
+                document.getElementById('max-retries').value = config.SPREADSHEET_UPDATE_CONFIG.maxRetries || 3;
+                document.getElementById('validate-data').checked = config.SPREADSHEET_UPDATE_CONFIG.validateBeforeApply !== false;
+                document.getElementById('backup-on-update').checked = config.SPREADSHEET_UPDATE_CONFIG.backupOnUpdate !== false;
+            }
+            
+            // Load backup info
+            loadBackupInfo();
+        }
+        
+        function loadBackupInfo() {
+            const backupJson = localStorage.getItem('micfinder_backup');
+            if (backupJson) {
+                try {
+                    const backup = JSON.parse(backupJson);
+                    document.getElementById('backup-status').textContent = 'Yes';
+                    document.getElementById('backup-info').innerHTML = `
+                        <p><strong>Backup created:</strong> ${new Date(backup.timestamp).toLocaleString()}</p>
+                        <p><strong>Mics in backup:</strong> ${backup.micCount}</p>
+                    `;
+                } catch (e) {
+                    document.getElementById('backup-status').textContent = 'No';
+                    document.getElementById('backup-info').innerHTML = '<p class="text-red-500">Invalid backup data</p>';
+                }
+            } else {
+                document.getElementById('backup-status').textContent = 'No';
+                document.getElementById('backup-info').innerHTML = '<p>No backup available</p>';
+            }
+        }
+        
+        // Event handlers
+        document.getElementById('enable-updates').addEventListener('click', () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                window.MicFinderSpreadsheetUpdater.enableUpdates();
+                loadStatus();
+                alert('Auto updates enabled');
+            }
+        });
+        
+        document.getElementById('disable-updates').addEventListener('click', () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                window.MicFinderSpreadsheetUpdater.disableUpdates();
+                loadStatus();
+                alert('Auto updates disabled');
+            }
+        });
+        
+        document.getElementById('force-update').addEventListener('click', async () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                try {
+                    document.getElementById('force-update').disabled = true;
+                    document.getElementById('force-update').textContent = 'Updating...';
+                    
+                    const result = await window.MicFinderSpreadsheetUpdater.forceUpdate();
+                    loadStatus();
+                    
+                    if (result) {
+                        alert('Update completed successfully');
+                    } else {
+                        alert('No updates available or update failed');
+                    }
+                } catch (error) {
+                    alert('Update failed: ' + error.message);
+                } finally {
+                    document.getElementById('force-update').disabled = false;
+                    document.getElementById('force-update').innerHTML = '<i class="fa fa-sync mr-2"></i>Force Update Now';
+                }
+            }
+        });
+        
+        document.getElementById('clear-cache').addEventListener('click', () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                window.MicFinderSpreadsheetUpdater.clearCache();
+                alert('Cache cleared');
+            }
+        });
+        
+        document.getElementById('create-backup').addEventListener('click', () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                window.MicFinderSpreadsheetUpdater.createBackup();
+                loadBackupInfo();
+                alert('Backup created');
+            }
+        });
+        
+        document.getElementById('restore-backup').addEventListener('click', () => {
+            if (window.MicFinderSpreadsheetUpdater) {
+                const result = window.MicFinderSpreadsheetUpdater.restoreFromBackup();
+                if (result) {
+                    loadStatus();
+                    alert('Backup restored successfully');
+                } else {
+                    alert('Failed to restore backup');
+                }
+            }
+        });
+        
+        document.getElementById('save-config').addEventListener('click', () => {
+            // Save configuration to localStorage
+            const config = {
+                sheetsUrl: document.getElementById('sheets-url').value,
+                updateInterval: parseInt(document.getElementById('update-interval').value) * 60 * 60 * 1000,
+                maxRetries: parseInt(document.getElementById('max-retries').value),
+                validateData: document.getElementById('validate-data').checked,
+                backupOnUpdate: document.getElementById('backup-on-update').checked
+            };
+            
+            localStorage.setItem('micfinder_admin_config', JSON.stringify(config));
+            alert('Configuration saved');
+        });
+        
+        // Load status on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for main app to load
+            setTimeout(loadStatus, 1000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .favorite-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .favorite-btn.favorited { color: #f59e0b; }
+        .favorite-btn.not-favorited { color: #9ca3af; }
+    </style>
+</head>
+<body>
+    <h1>Favorites Debug Test</h1>
+    
+    <div class="test-section">
+        <h3>Module Availability Test</h3>
+        <div id="module-status"></div>
+        <button onclick="checkModules()">Check Modules</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Favorites Functionality Test</h3>
+        <div id="favorites-test">
+            <p>Test mic: <strong>Test Venue</strong></p>
+            <button class="favorite-btn not-favorited" onclick="testToggleFavorite('test-mic-1')">
+                <i class="fa-regular fa-star"></i>
+            </button>
+        </div>
+        <button onclick="testFavorites()">Test Favorites</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Console Output</h3>
+        <div id="console-output" style="background: #f8f9fa; padding: 10px; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <!-- Load required scripts in order -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/favorites.js"></script>
+    
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleOutput = document.getElementById('console-output');
+        
+        function addToConsole(message, type = 'log') {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : 'black';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        function checkModules() {
+            const statusDiv = document.getElementById('module-status');
+            let html = '';
+            
+            // Check config
+            if (window.MicFinderConfig) {
+                html += '<div class="success">✓ MicFinderConfig: Available</div>';
+                html += `<div>FAVORITES_STORAGE_KEY: ${window.MicFinderConfig.FAVORITES_STORAGE_KEY}</div>`;
+            } else {
+                html += '<div class="error">✗ MicFinderConfig: Not available</div>';
+            }
+            
+            // Check state
+            if (window.MicFinderState) {
+                html += '<div class="success">✓ MicFinderState: Available</div>';
+            } else {
+                html += '<div class="error">✗ MicFinderState: Not available</div>';
+            }
+            
+            // Check favorites
+            if (window.MicFinderFavorites) {
+                html += '<div class="success">✓ MicFinderFavorites: Available</div>';
+                if (window.MicFinderFavorites.toggleFavorite) {
+                    html += '<div class="success">✓ toggleFavorite function: Available</div>';
+                } else {
+                    html += '<div class="error">✗ toggleFavorite function: Not available</div>';
+                }
+            } else {
+                html += '<div class="error">✗ MicFinderFavorites: Not available</div>';
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        function testFavorites() {
+            console.log('Testing favorites functionality...');
+            
+            if (!window.MicFinderFavorites) {
+                console.error('MicFinderFavorites not available');
+                return;
+            }
+            
+            if (!window.MicFinderFavorites.toggleFavorite) {
+                console.error('toggleFavorite function not available');
+                return;
+            }
+            
+            // Test basic functionality
+            try {
+                const result = window.MicFinderFavorites.toggleFavorite('test-mic-1');
+                console.log('toggleFavorite result:', result);
+            } catch (error) {
+                console.error('Error calling toggleFavorite:', error);
+            }
+        }
+        
+        function testToggleFavorite(micId) {
+            console.log('Manual toggle favorite for:', micId);
+            
+            if (window.MicFinderFavorites && window.MicFinderFavorites.toggleFavorite) {
+                try {
+                    window.MicFinderFavorites.toggleFavorite(micId);
+                    updateFavoriteButton(micId);
+                } catch (error) {
+                    console.error('Error toggling favorite:', error);
+                }
+            } else {
+                console.error('Favorites module not available');
+                // Fallback: just toggle the UI
+                toggleFavoriteUI(micId);
+            }
+        }
+        
+        function updateFavoriteButton(micId) {
+            const btn = document.querySelector(`[onclick*="${micId}"]`);
+            if (!btn) return;
+            
+            // Check if it's favorited by looking at the icon
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('fa-solid')) {
+                btn.className = 'favorite-btn favorited';
+            } else {
+                btn.className = 'favorite-btn not-favorited';
+            }
+        }
+        
+        function toggleFavoriteUI(micId) {
+            const btn = document.querySelector(`[onclick*="${micId}"]`);
+            if (!btn) return;
+            
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('fa-solid')) {
+                icon.className = 'fa-regular fa-star';
+                btn.className = 'favorite-btn not-favorited';
+            } else {
+                icon.className = 'fa-solid fa-star';
+                btn.className = 'favorite-btn favorited';
+            }
+        }
+        
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+        
+        // Check modules on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkModules();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

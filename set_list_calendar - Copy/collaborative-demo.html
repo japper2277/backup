@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Real-time Collaborative Setlist Builder</title>
+    <meta name="description" content="Live demonstration of real-time collaborative joke and setlist management with Firebase">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#10b981" />
+    
+    <!-- Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        #root {
+            min-height: 100vh;
+        }
+        
+        /* Demo header */
+        .demo-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-banner .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .demo-banner .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        /* Adjust main content */
+        #root {
+            padding-top: 3.5rem;
+        }
+        
+        /* Loading state */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1.5rem;
+        }
+        
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .loading-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #10b981;
+        }
+        
+        .loading-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-features {
+            font-size: 0.8rem;
+            color: #475569;
+            line-height: 1.8;
+        }
+        
+        /* Error state */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-message {
+            color: #64748b;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+        
+        .retry-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .retry-button:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Multi-tab instructions */
+        .multi-tab-tip {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            max-width: 280px;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.5s ease-out 2s both;
+        }
+        
+        .multi-tab-tip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-banner {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            
+            #root {
+                padding-top: 3rem;
+            }
+            
+            .multi-tab-tip {
+                display: none; /* Hide on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live demo banner -->
+    <div class="demo-banner">
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            <strong>LIVE DEMO:</strong> Real-time Collaborative Setlist Builder
+            <span style="margin: 0 1rem; opacity: 0.8;">•</span>
+            <i class="fas fa-users"></i> Multi-user editing
+            <span style="margin: 0 1rem; opacity: 0.8;">•</span>
+            <i class="fas fa-sync-alt"></i> Instant sync
+            <span style="margin: 0 1rem; opacity: 0.8;">•</span>
+            <i class="fas fa-comments"></i> Click-to-comment
+            <span style="margin: 0 1rem; opacity: 0.8;">•</span>
+            <i class="fas fa-at"></i> @mention system
+        </div>
+    </div>
+
+    <!-- React app root -->
+    <div id="root">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">
+                <div class="loading-title">
+                    <i class="fas fa-rocket"></i> 
+                    Initializing Collaboration
+                </div>
+                <div class="loading-subtitle">
+                    Starting Firebase real-time services...
+                </div>
+                <div class="loading-features">
+                    ✓ Firestore Database<br/>
+                    ✓ Realtime Database for Presence<br/>
+                    ✓ Anonymous Authentication<br/>
+                    ✓ Real-time Listeners<br/>
+                    ✓ Collaborative Features<br/>
+                    ✓ Comment System with Threading<br/>
+                    ✓ @Mention Support
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-tab tip -->
+    <div class="multi-tab-tip">
+        <div class="multi-tab-tip-title">
+            <i class="fas fa-lightbulb"></i>
+            Pro Tip!
+        </div>
+        Open this page in multiple browser tabs or windows to see real-time collaboration in action! Click the 💬 icons on jokes to start threaded discussions with @mentions.
+    </div>
+
+    <!-- Load the collaborative demo -->
+    <script type="module">
+        import { CollaborativeDemoApp } from '/src/components/CollaborativeDemoApp.jsx';
+        import React from 'https://esm.sh/react@18';
+        import { createRoot } from 'https://esm.sh/react-dom@18/client';
+
+        // Error boundary component
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+
+            componentDidCatch(error, errorInfo) {
+                console.error('Demo app error:', error, errorInfo);
+            }
+
+            render() {
+                if (this.state.hasError) {
+                    return React.createElement('div', 
+                        { className: 'error-container' },
+                        React.createElement('i', { className: 'fas fa-exclamation-triangle error-icon' }),
+                        React.createElement('h1', { className: 'error-title' }, 'Demo Failed to Load'),
+                        React.createElement('p', { className: 'error-message' }, 
+                            this.state.error?.message || 'An unexpected error occurred while loading the collaborative demo.'
+                        ),
+                        React.createElement('button', 
+                            { 
+                                className: 'retry-button',
+                                onClick: () => window.location.reload()
+                            },
+                            React.createElement('i', { className: 'fas fa-redo' }),
+                            'Reload Demo'
+                        )
+                    );
+                }
+
+                return this.props.children;
+            }
+        }
+
+        // Initialize the app
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        
+        root.render(
+            React.createElement(ErrorBoundary, null,
+                React.createElement(CollaborativeDemoApp)
+            )
+        );
+    </script>
+</body>
+</html>

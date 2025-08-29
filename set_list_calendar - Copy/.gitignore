@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+
+# Vercel
+.vercel/
+
+# Firebase
+.firebase/
+venv/
+*/venv/

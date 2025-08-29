@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - users can only read/write their own profile
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // User's jokes subcollection
+      match /jokes/{jokeId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Setlists collection - more complex permissions
+    match /setlists/{setlistId} {
+      // Allow reading if user is owner or document is shared with them
+      allow read: if isAuthenticated() && 
+                     (isOwner(resource.data.ownerId) || 
+                      (resource.data.sharedWith != null && 
+                       request.auth.uid in resource.data.sharedWith.keys()));
+      
+      // Allow creating if authenticated and user is the owner
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.ownerId;
+      
+      // Allow updating if owner or has edit permission
+      allow update: if isAuthenticated() && 
+                       (isOwner(resource.data.ownerId) || 
+                        (resource.data.sharedWith != null && 
+                         request.auth.uid in resource.data.sharedWith.keys()));
+      
+      // Only owner can delete
+      allow delete: if isOwner(resource.data.ownerId);
+      
+      // Comments on jokes within setlists
+      match /jokes/{jokeId}/comments/{commentId} {
+        // Allow reading comments if user has access to the setlist
+        allow read: if isAuthenticated();
+        
+        // Allow creating comments if user has access to the setlist
+        allow create: if isAuthenticated() && 
+                         request.auth.uid == request.resource.data.authorId;
+        
+        // Allow updating/deleting own comments
+        allow update, delete: if isAuthenticated() && 
+                                 request.auth.uid == resource.data.authorId;
+      }
+    }
+    
+    // Public read access for user discovery (for sharing)
+    match /userProfiles/{userId} {
+      allow read: if isAuthenticated();
+    }
+    
+    // Presence data for real-time collaboration
+    match /presence/{setlistId}/{presenceKey} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

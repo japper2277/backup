@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Routing Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/utils.js"></script>
+    <script src="js/mobile.js"></script>
+</head>
+<body>
+    <h1>Mobile Routing Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Mock dependencies for testing
+        window.MicFinderState = {
+            getActiveFilters: () => ({ day: 'Monday', search: 'test' }),
+            setActiveFilters: () => {},
+            getAllMics: () => []
+        };
+        window.MicFinderFilters = {
+            saveFilterState: () => {}
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const results = document.getElementById('test-results');
+            
+            // Test mobile routing functions
+            const functions = [
+                'preserveCurrentState',
+                'restorePreservedState',
+                'initializeMobileRouting'
+            ];
+            
+            functions.forEach(func => {
+                const exists = window.MicFinderMobile && typeof window.MicFinderMobile[func] === 'function';
+                results.innerHTML += '<p>' + func + ': ' + (exists ? 'Available' : 'Missing') + '</p>';
+            });
+            
+            // Test state preservation
+            if (window.MicFinderMobile) {
+                const state = window.MicFinderMobile.preserveCurrentState();
+                results.innerHTML += '<p>State preservation test: ' + JSON.stringify(state) + '</p>';
+            }
+            
+            // Test redirect prevention
+            const hasRedirect = sessionStorage.getItem('lastMobileRedirect');
+            results.innerHTML += '<p>Redirect prevention storage: ' + (hasRedirect ? 'Working' : 'Not set') + '</p>';
+            
+            console.log('Mobile routing test completed');
+        });
+    </script>
+</body>
+</html>

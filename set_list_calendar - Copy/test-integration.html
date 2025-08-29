@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Drag System Integration Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-header {
+            background: linear-gradient(135deg, #1DB954, #45a3ff);
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        .test-iframe {
+            width: 100%;
+            height: 70vh;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .test-controls {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .test-button {
+            background: #1DB954;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-family: inherit;
+        }
+        .test-button:hover {
+            background: #1ed760;
+        }
+        .test-results {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .console-output {
+            color: #00ff00;
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🧪 Unified Drag System Integration Test</h1>
+        <p>Testing the surgically integrated @dnd-kit + Firebase system</p>
+    </div>
+    
+    <div class="test-controls">
+        <button class="test-button" onclick="loadCollaborativeDemo()">Load Collaborative Demo</button>
+        <button class="test-button" onclick="loadUnifiedDemo()">Load Unified Demo</button>
+        <button class="test-button" onclick="runTests()">Run Integration Tests</button>
+        <button class="test-button" onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <iframe id="testFrame" class="test-iframe" src="about:blank"></iframe>
+    
+    <div class="test-results">
+        <div class="console-output" id="testOutput">
+Click "Load Collaborative Demo" then "Run Integration Tests" to validate the unified drag system.
+
+Expected test results:
+✅ UC-001 Bank-to-setlist: Drag from joke bank to setlist
+✅ UC-002 Setlist reordering: Reorder jokes within setlist
+✅ INT-001 DndKit integration: @dnd-kit + Firebase working together
+✅ UC-006 Collaboration: Real-time collaboration features
+✅ Performance: UI responds within 300ms
+        </div>
+    </div>
+
+    <script>
+        const testFrame = document.getElementById('testFrame');
+        const testOutput = document.getElementById('testOutput');
+        
+        function log(message) {
+            testOutput.textContent += message + '\n';
+            testOutput.scrollTop = testOutput.scrollHeight;
+        }
+        
+        function loadCollaborativeDemo() {
+            log('🔄 Loading Collaborative Demo...');
+            testFrame.src = '/react-demo.html?collaborative=true';
+            
+            testFrame.onload = () => {
+                log('✅ Collaborative demo loaded successfully');
+                log('🎯 Ready to test unified drag system integration');
+            };
+        }
+        
+        function loadUnifiedDemo() {
+            log('🔄 Loading Unified Demo (for comparison)...');
+            testFrame.src = '/react-demo.html?unified=true';
+            
+            testFrame.onload = () => {
+                log('✅ Unified demo loaded successfully');
+                log('🎯 Ready to test pure @dnd-kit system');
+            };
+        }
+        
+        function runTests() {
+            if (testFrame.src === 'about:blank') {
+                log('❌ ERROR: Load a demo first before running tests');
+                return;
+            }
+            
+            log('🧪 Starting integration tests...');
+            
+            try {
+                // Inject test script into iframe
+                const testScript = testFrame.contentDocument.createElement('script');
+                testScript.src = '/test-unified-drag.js';
+                testFrame.contentDocument.head.appendChild(testScript);
+                
+                // Capture console output from iframe
+                const originalConsole = testFrame.contentWindow.console;
+                testFrame.contentWindow.console = {
+                    ...originalConsole,
+                    log: (msg) => {
+                        originalConsole.log(msg);
+                        log('📝 ' + msg);
+                    },
+                    error: (msg) => {
+                        originalConsole.error(msg);
+                        log('❌ ERROR: ' + msg);
+                    },
+                    warn: (msg) => {
+                        originalConsole.warn(msg);
+                        log('⚠️ WARNING: ' + msg);
+                    }
+                };
+                
+                // Wait for script to load and run tests
+                setTimeout(() => {
+                    if (testFrame.contentWindow.testUnifiedDragSystem) {
+                        testFrame.contentWindow.testUnifiedDragSystem();
+                    } else {
+                        log('❌ ERROR: Test script failed to load');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                log('❌ ERROR: Failed to inject test script - ' + error.message);
+                log('💡 Try opening browser dev console and running tests manually');
+            }
+        }
+        
+        function clearResults() {
+            testOutput.textContent = 'Test results cleared. Ready for new tests.\n';
+        }
+        
+        // Load collaborative demo by default
+        setTimeout(loadCollaborativeDemo, 500);
+    </script>
+</body>
+</html>

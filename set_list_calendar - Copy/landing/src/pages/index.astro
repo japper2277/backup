@@ -1,0 +1,213 @@
+---
+// Landing Page - Exactly 4 Elements as Specified
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Craft Your Perfect Set. In Real-Time. | Mic Calendar</title>
+  <meta name="description" content="The professional, real-time collaborative setlist builder for stand-up comedians. Build, time, and perfect your sets with collaborative editing, timed sets, and performance mode.">
+  
+  <!-- Preload Critical Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Global Styles -->
+  <style>
+    /* Landing Page Global Styles */
+    :root {
+      --bg-main: #0a0b0d;
+      --bg-surface: #1a1d21;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --accent-green: #1db954;
+      --accent-blue: #45a3ff;
+      --accent-orange: #f5c518;
+      --border-color: #333537;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 0;
+    }
+
+    .hero-content {
+      max-width: 800px;
+    }
+
+    .headline {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subheadline {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 2.5rem;
+      background: var(--accent-green);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 4rem;
+    }
+
+    .cta-button:hover {
+      background: #1ed760;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(29, 185, 84, 0.4);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+      margin-top: 4rem;
+    }
+
+    .feature {
+      text-align: center;
+      padding: 2rem;
+      background: var(--bg-surface);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      transition: transform 0.3s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-green);
+    }
+
+    .feature h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .feature p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .headline {
+        font-size: 2.5rem;
+      }
+      
+      .subheadline {
+        font-size: 1.2rem;
+      }
+      
+      .cta-button {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <!-- 1. HEADLINE (H1) - Powerful, benefit-oriented statement -->
+        <h1 class="headline">Craft Your Perfect Set. In Real-Time.</h1>
+        
+        <!-- 2. SUB-HEADLINE (P) - Single sentence explaining the "what" -->
+        <p class="subheadline">The professional, real-time collaborative setlist builder for stand-up comedians.</p>
+        
+        <!-- 3. CALL TO ACTION (Button) - Single, prominent button -->
+        <a href="../react-demo.html?signup=true" class="cta-button">
+          <i class="fas fa-rocket"></i>
+          Sign Up For Free
+        </a>
+        
+        <!-- 4. KEY FEATURES (3 sections) - Three simple sections with icon and brief description -->
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>Collaborative Editing</h3>
+            <p>Work together with other comedians in real-time. Share setlists, get feedback, and perfect your material together.</p>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+            <h3>Timed Sets</h3>
+            <p>Track your performance timing down to the second. Know exactly how long your set runs and hit your targets perfectly.</p>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">
+              <i class="fas fa-stage"></i>
+            </div>
+            <h3>Performance Mode</h3>
+            <p>Clean, distraction-free performance view. Focus on your set with large text, easy navigation, and stage-ready display.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

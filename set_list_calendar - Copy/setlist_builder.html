@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist Builder - 10 UI/UX Optimizations Demo</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #18191a;
+            --bg-surface: #232533;
+            --bg-surface-2: #3a3b3c;
+            --bg-input: #2a2d3e;
+            --border-color: #3e4042;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --accent-blue: #45a3ff;
+            --accent-green: #32b977;
+            --accent-orange: #f5c518;
+            --accent-red: #ef4444;
+            --font-sans: 'Inter', sans-serif;
+        }
+        body { font-family: var(--font-sans); background-color: var(--bg-main); color: var(--text-primary); margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .demo-container { max-width: 900px; width: 100%; background: var(--bg-surface); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h1 { text-align: center; margin-top: 0; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        select, input { background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-primary); font-size: 0.95rem; font-family: inherit; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        .form-btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+        .btn-secondary { background-color: var(--bg-surface-2); color: var(--text-secondary); border-color: var(--border-color); }
+        .btn-primary { background-color: var(--accent-blue); color: #ffffff; }
+
+        /* --- Setlist Builder Styles --- */
+        .setlist-builder { border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-surface); min-height: 400px; }
+        .setlist-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; height: 400px; }
+        .joke-bank-panel, .current-setlist-panel { background: var(--bg-main); display: flex; flex-direction: column; }
+        .panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); background: var(--bg-surface-2); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .panel-header h4 { margin: 0; font-size: 0.9rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .joke-bank-list, .current-setlist { flex: 1; overflow-y: auto; padding: 0.5rem; transition: background-color 0.2s; }
+        .joke-bank-item { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: grab; transition: all 0.2s ease; position: relative; }
+        .joke-bank-item:hover { border-color: var(--accent-blue); background: var(--bg-surface-2); }
+        .joke-item-text { font-size: 0.9rem; line-height: 1.3; color: var(--text-primary); margin-bottom: 0.5rem; pointer-events: none; }
+        .joke-item-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-secondary); pointer-events: none; }
+        .joke-item-duration { background: var(--accent-blue); color: white; padding: 0.125rem 0.375rem; border-radius: 12px; font-weight: 600; }
+        .setlist-item { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; transition: all 0.2s ease; position: relative; display: flex; align-items: center; gap: 0.75rem; }
+        .empty-setlist, .empty-joke-bank { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 2rem; }
+        .empty-setlist i, .empty-joke-bank i { font-size: 2rem; margin-bottom: 1rem; opacity: 0.5; }
+        .panel-actions { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); }
+        .add-set-btn { font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem; background: var(--accent-green); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; width: 100%; }
+        .add-set-btn i { margin-right: 0.5rem; }
+
+        /* IDEA 1: Signal Draggability for Reordering */
+        .drag-handle { cursor: grab; color: var(--text-secondary); opacity: 0.5; transition: opacity 0.2s; }
+        .setlist-item:hover .drag-handle { opacity: 1; }
+        
+        /* IDEA 5: Reduce Visual Weight of Setlist Numbers */
+        .setlist-item-number { font-size: 0.9rem; font-weight: 700; color: var(--accent-green); border: 2px solid var(--accent-green); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        
+        /* IDEA 6: Clear Visual Feedback on Drag */
+        .sortable-ghost { opacity: 0.4; background: var(--bg-surface-2); }
+        .drop-placeholder { background-color: rgba(69, 163, 255, 0.1); border: 2px dashed var(--accent-blue); border-radius: 6px; }
+        .current-setlist.drag-over { background-color: rgba(69, 163, 255, 0.05); }
+
+        /* IDEA 7: Animate Setlist Changes */
+        .setlist-item { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .setlist-item.fade-enter { opacity: 0; transform: translateY(20px); }
+        .setlist-item.fade-enter-active { opacity: 1; transform: translateY(0); }
+        
+        /* IDEA 9: Collapsible Panel */
+        .panel-header .chevron { cursor: pointer; transition: transform 0.2s; }
+        .panel-header .chevron.collapsed { transform: rotate(-90deg); }
+        .joke-bank-panel .panel-content { transition: max-height 0.3s ease-out, opacity 0.3s; max-height: 500px; opacity: 1; overflow: hidden; display: flex; flex-direction: column; flex-grow: 1; }
+        .joke-bank-panel.collapsed .panel-content { max-height: 0; opacity: 0; }
+        
+        /* IDEA 10: Joke Card Hover Actions */
+        .joke-bank-item .hover-actions { position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.25rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+        .joke-bank-item:hover .hover-actions { opacity: 1; pointer-events: all; }
+        .hover-btn { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .hover-btn:hover { background: var(--accent-blue); color: white; }
+        .hover-btn i { font-size: 0.8rem; }
+        
+        /* IDEA 3: Performance-Specific Notes */
+        .setlist-item-content { flex-grow: 1; }
+        .performance-note-icon { color: var(--text-secondary); cursor: pointer; margin-left: auto; opacity: 0.6; }
+        .performance-note-icon:hover { opacity: 1; color: var(--accent-orange); }
+        .performance-note-input { display: none; width: 100%; margin-top: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; font-size: 0.8rem; color: var(--text-primary); }
+        .performance-note-input.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Build Your Setlist</h1>
+        <div class="form-group">
+            <label for="setlistTemplate">Load a Saved Setlist</label>
+            <select id="setlistTemplate"><option value="">Choose a saved setlist...</option></select>
+        </div>
+
+        <div class="setlist-builder">
+            <div class="setlist-panels">
+                <div class="joke-bank-panel" id="jokeBankPanel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-lightbulb"></i> Your Jokes</h4>
+                        <!-- IDEA 9: Collapsible Panel Chevron -->
+                        <i class="fas fa-chevron-down chevron" id="toggleJokeBank"></i>
+                    </div>
+                    <div class="panel-content">
+                        <div class="panel-actions">
+                            <input type="search" id="jokeSearch" placeholder="Search jokes by text or tag..."> <!-- IDEA 2: Clearer Placeholder -->
+                        </div>
+                        <div class="joke-bank-list" id="modalJokeBank">
+                            <!-- Jokes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="current-setlist-panel">
+                    <div class="panel-header">
+                        <h4><i class="fas fa-list"></i> Current Setlist</h4>
+                        <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            <span id="jokeCount">0 jokes</span>
+                            <span id="totalDuration">0:00</span>
+                        </div>
+                    </div>
+                    <div class="current-setlist" id="currentSetlist">
+                        <!-- Setlist items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="form-btn btn-secondary">Cancel</button>
+            <button class="form-btn btn-primary">Save Set</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA STORE (Simulated) ---
+        const dataStore = {
+            jokes: [
+                { id: 101, text: 'Airplane food joke', tags: ['travel', 'food'], notes: 'Classic opener', estimated_duration: 60 },
+                { id: 102, text: 'Cat joke', tags: ['animals'], notes: 'Good for younger crowds', estimated_duration: 75 },
+                { id: 103, text: 'Dog joke', tags: ['animals'], notes: 'Follows the cat joke', estimated_duration: 50 },
+                { id: 104, text: 'Clean material only', tags: ['corporate', 'clean'], notes: 'Safe for work events', estimated_duration: 90 },
+                { id: 105, text: 'New 5 minutes', tags: ['new-material'], notes: 'Still needs work on the punchline', estimated_duration: 300 },
+                { id: 106, text: 'Best 10 minutes', tags: ['headlining', 'closer'], notes: 'My strongest material', estimated_duration: 600 },
+                { id: 107, text: 'Patriotic humor', tags: ['holiday', 'political'], notes: '4th of July special', estimated_duration: 120 },
+                { id: 108, text: 'Coffee shop observation', tags: ['observational'], notes: 'Relatable content', estimated_duration: 80 },
+            ],
+            getAllJokes: function() { return this.jokes; },
+            getJokeById: function(id) { return this.jokes.find(j => j.id === id); },
+        };
+
+        // --- STATE & DOM REFS ---
+        let currentSetlist = [
+            { id: 101, perfNote: '' }, 
+            { id: 102, perfNote: '' }, 
+            { id: 103, perfNote: '' }
+        ];
+        const jokeBankEl = document.getElementById('modalJokeBank');
+        const setlistEl = document.getElementById('currentSetlist');
+        const jokeSearchInput = document.getElementById('jokeSearch');
+
+        // --- CORE FUNCTIONS ---
+        function renderMiniJokeBank() {
+            const searchTerm = jokeSearchInput.value.toLowerCase();
+            const jokesInSet = new Set(currentSetlist.map(item => item.id));
+            
+            const filteredJokes = dataStore.getAllJokes().filter(j => 
+                !jokesInSet.has(j.id) &&
+                (j.text.toLowerCase().includes(searchTerm) || j.tags.some(t => t.toLowerCase().includes(searchTerm)))
+            );
+
+            // IDEA 4: Design for Empty States
+            if (filteredJokes.length === 0) {
+                jokeBankEl.innerHTML = `<div class="empty-joke-bank"><i class="fas fa-search"></i><p>${searchTerm ? 'No jokes found matching your search.' : 'All jokes are in the setlist!'}</p></div>`;
+                return;
+            }
+
+            jokeBankEl.innerHTML = filteredJokes.map(createJokeBankItem).join('');
+        }
+        
+        function createJokeBankItem(joke) {
+            return `
+                <div class="joke-bank-item" data-joke-id="${joke.id}">
+                    <!-- IDEA 10: Joke Card Hover Actions -->
+                    <div class="hover-actions">
+                        <button class="hover-btn" title="Add to Setlist" data-action="add" data-joke-id="${joke.id}"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="joke-item-text">${joke.text}</div>
+                    <div class="joke-item-meta">
+                        <span>${joke.tags.join(', ')}</span>
+                        <div class="joke-item-duration">${joke.estimated_duration}s</div>
+                    </div>
+                </div>`;
+        }
+
+        function renderCurrentSetlist() {
+            if (currentSetlist.length === 0) {
+                setlistEl.innerHTML = `<div class="empty-setlist"><i class="fas fa-arrow-left"></i><p>Drag jokes here</p></div>`;
+            } else {
+                setlistEl.innerHTML = currentSetlist.map((item, index) => {
+                    const joke = dataStore.getJokeById(item.id);
+                    return createSetlistItem(joke, item, index + 1);
+                }).join('');
+            }
+            updateStats();
+        }
+        
+        function createSetlistItem(joke, item, position) {
+            return `
+                <div class="setlist-item" data-joke-id="${joke.id}">
+                    <!-- IDEA 1: Signal Draggability -->
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <!-- IDEA 5: Reduced Visual Weight of Numbers -->
+                    <div class="setlist-item-number">${position}</div>
+                    <div class="setlist-item-content">
+                        <div class="joke-item-text">${joke.text}</div>
+                        <div class="joke-item-meta">
+                            <span>${joke.tags.join(', ')}</span>
+                            <div class="joke-item-duration">${joke.estimated_duration}s</div>
+                        </div>
+                        <!-- IDEA 3: Performance-Specific Notes -->
+                        <input type="text" class="performance-note-input ${item.perfNote ? 'active' : ''}" placeholder="Add performance note..." value="${item.perfNote}" data-joke-id="${joke.id}">
+                    </div>
+                    <i class="fas fa-comment-dots performance-note-icon" title="Add performance note"></i>
+                </div>`;
+        }
+
+        function updateStats() {
+            const totalJokes = currentSetlist.length;
+            const totalSeconds = currentSetlist.reduce((sum, item) => {
+                const joke = dataStore.getJokeById(item.id);
+                return sum + (joke ? joke.estimated_duration : 0);
+            }, 0);
+            
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // IDEA 8: Animate Stat Updates
+            animateCountUp('jokeCount', totalJokes, ' jokes');
+            document.getElementById('totalDuration').textContent = durationStr;
+        }
+
+        function animateCountUp(elementId, endValue, suffix = '') {
+            const el = document.getElementById(elementId);
+            const startValue = parseInt(el.textContent) || 0;
+            if (startValue === endValue) return;
+            
+            const duration = 300;
+            let startTime = null;
+
+            function animation(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const currentValue = Math.floor(progress * (endValue - startValue) + startValue);
+                el.textContent = currentValue + suffix;
+                if (progress < 1) {
+                    requestAnimationFrame(animation);
+                }
+            }
+            requestAnimationFrame(animation);
+        }
+        
+        // --- EVENT LISTENERS ---
+        jokeSearchInput.addEventListener('input', renderMiniJokeBank);
+
+        // IDEA 9: Collapsible Panel Listener
+        document.getElementById('toggleJokeBank').addEventListener('click', e => {
+            e.target.classList.toggle('collapsed');
+            document.getElementById('jokeBankPanel').classList.toggle('collapsed');
+        });
+
+        // IDEA 10 & 3: Event delegation for dynamic elements
+        document.body.addEventListener('click', e => {
+            // Hover action button to add joke
+            if (e.target.matches('[data-action="add"]')) {
+                const jokeId = parseInt(e.target.dataset.jokeId);
+                currentSetlist.push({ id: jokeId, perfNote: '' });
+                renderMiniJokeBank();
+                renderCurrentSetlist();
+            }
+            // Performance note icon
+            if (e.target.classList.contains('performance-note-icon')) {
+                const input = e.target.previousElementSibling.querySelector('.performance-note-input');
+                input.classList.toggle('active');
+                if (input.classList.contains('active')) {
+                    input.focus();
+                }
+            }
+        });
+        
+        // IDEA 3: Save performance notes on input change
+        setlistEl.addEventListener('input', e => {
+            if (e.target.classList.contains('performance-note-input')) {
+                const jokeId = parseInt(e.target.dataset.jokeId);
+                const note = e.target.value;
+                const itemInSetlist = currentSetlist.find(item => item.id === jokeId);
+                if (itemInSetlist) {
+                    itemInSetlist.perfNote = note;
+                }
+            }
+        });
+
+        // --- DRAG-AND-DROP SETUP ---
+        new Sortable(jokeBankEl, {
+            group: { name: 'setlist', pull: 'clone', put: false },
+            sort: false,
+            animation: 150,
+            ghostClass: 'sortable-ghost', // IDEA 6
+        });
+
+        new Sortable(setlistEl, {
+            group: 'setlist',
+            handle: '.drag-handle', // IDEA 1
+            animation: 150,
+            ghostClass: 'sortable-ghost', // IDEA 6
+            dragoverBubble: false,
+            // IDEA 6
+            onStart: function() { setlistEl.classList.add('drag-over'); },
+            onEnd: function() { setlistEl.classList.remove('drag-over'); },
+            onAdd: function (evt) {
+                const jokeId = parseInt(evt.item.dataset.jokeId);
+                // IDEA 7: Animate entry
+                evt.item.classList.add('fade-enter');
+                currentSetlist.splice(evt.newIndex, 0, { id: jokeId, perfNote: '' });
+                renderCurrentSetlist();
+                renderMiniJokeBank();
+                setTimeout(() => {
+                    const newEl = setlistEl.children[evt.newIndex];
+                    if(newEl) newEl.classList.add('fade-enter-active');
+                }, 10);
+            },
+            onUpdate: function (evt) {
+                const movedItem = currentSetlist.splice(evt.oldIndex, 1)[0];
+                currentSetlist.splice(evt.newIndex, 0, movedItem);
+                renderCurrentSetlist();
+            }
+        });
+
+        // --- INITIAL RENDER ---
+        renderMiniJokeBank();
+        renderCurrentSetlist();
+    });
+    </script>
+</body>
+</html>
